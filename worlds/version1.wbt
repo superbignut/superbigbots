@@ -1,0 +1,131 @@
+#VRML_SIM R2023b utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/Floor.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/boston_dynamics/spot/protos/Spot.proto"
+
+WorldInfo {
+}
+Viewpoint {
+  orientation 0.2603437469361842 0.0005977547039494055 -0.9655158083224439 3.0245965070560117
+  position 14.854621237841025 0.4774221546578908 7.3802384004687305
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+Floor {
+  size 10000 10000
+}
+Solid {
+  translation -4 0.4 0
+  children [
+    DEF WALL Shape {
+      appearance PBRAppearance {
+      }
+      geometry Box {
+        size 0.1 10 2
+      }
+    }
+  ]
+  name "wall1"
+}
+Solid {
+  translation 0.966047 -4.68994 0
+  rotation 0 0 1 -1.6010996938995747
+  children [
+    USE WALL
+  ]
+  name "wall2"
+}
+Spot {
+  hidden linearVelocity_0 -1.7910738170319523e-05 1.4208108294062181e-05 -1.880343846866571e-05
+  hidden angularVelocity_0 9.576682617588293e-06 -2.1726474031564058e-06 -0.00015769925140104063
+  hidden translation_18 -0.0528 0.0006 0
+  hidden rotation_18 0 0 -1 0.16240766091134867
+  hidden linearVelocity_18 -2.81001794695539e-05 -2.830595565781949e-05 -1.9555238073661322e-05
+  hidden angularVelocity_18 1.5013614119339915e-05 -1.1242062881953095e-05 -0.00015834305068420198
+  hidden translation_19 0 -0.00053 0
+  hidden rotation_19 -0.9999999999999999 0 0 0.04155633600464708
+  hidden linearVelocity_19 3.7529903297033044e-06 -1.665323765179579e-05 -1.0391613793189712e-05
+  hidden angularVelocity_19 6.0437367089563e-05 4.292215379020519e-05 -0.000148040255215651
+  hidden translation_21 -0.1122 -0.319729 0.182338
+  hidden rotation_21 -1 0 0 0.019719276818612293
+  hidden linearVelocity_21 7.126632873321477e-06 3.404381331875543e-06 -1.0473405023569086e-05
+  hidden angularVelocity_21 6.206813287088953e-05 3.8399777328748186e-05 -0.00014546765814021088
+  hidden translation_22 0.0528 0.0006 0
+  hidden rotation_22 0 0 1 0.11382126350025179
+  hidden linearVelocity_22 -6.0721534083887755e-05 -7.720264409028462e-06 -2.0454498967645614e-05
+  hidden angularVelocity_22 2.1949686977811672e-05 3.221304603872353e-07 -0.00015976932803015266
+  hidden translation_23 0 -0.00053 0
+  hidden rotation_23 -0.9999999999999999 0 0 0.04154722621752435
+  hidden linearVelocity_23 -5.7430053467905414e-05 2.023746030248208e-05 -3.820659708188831e-05
+  hidden angularVelocity_23 -8.18090528689721e-05 -0.00016207640582063674 -0.00013578406655331704
+  hidden translation_25 0.1122 -0.319729 0.182338
+  hidden rotation_25 -1 0 0 0.019705539773906173
+  hidden linearVelocity_25 -1.6535252755993056e-05 1.2457294043155197e-05 -3.544011084745095e-05
+  hidden angularVelocity_25 -7.596958301967684e-05 -0.00015969030639227606 -0.0001338013901544592
+  hidden translation_26 -0.0528 0.0006 0
+  hidden rotation_26 0 0 -1 0.18209585217355773
+  hidden linearVelocity_26 3.288043617409498e-05 2.9671468344140157e-05 -1.7083537833027604e-05
+  hidden angularVelocity_26 -2.8813455180790036e-06 -1.1289261419667367e-05 -0.00016339610690290383
+  hidden translation_27 0 -0.00053 0
+  hidden rotation_27 -0.9999999999999999 0 0 0.09357294063182145
+  hidden linearVelocity_27 5.4368236868698855e-05 1.546485326870117e-05 -1.6509900460495163e-06
+  hidden angularVelocity_27 9.77995899931209e-05 0.00015152599842431762 -0.00013459033524424634
+  hidden translation_29 -0.1122 -0.319729 0.182338
+  hidden rotation_29 1 0 0 0.1228024810218328
+  hidden linearVelocity_29 2.612924665687674e-05 1.4667753820504951e-05 -5.4456018096435105e-06
+  hidden angularVelocity_29 9.125340765622861e-05 0.00014737777644105915 -0.00013842734335996526
+  hidden translation_30 0.0528 0.0006 0
+  hidden rotation_30 0 0 1 0.1514168075512658
+  hidden linearVelocity_30 -1.7887598838592558e-05 6.140446576148222e-05 -1.8292743871864592e-05
+  hidden angularVelocity_30 1.043140003568336e-05 9.77220971151114e-06 -0.00016195471941917903
+  hidden translation_31 0 -0.00053 0
+  hidden rotation_31 -1 0 0 0.09354092440340533
+  hidden linearVelocity_31 -3.096473023336049e-05 6.678242431540176e-05 -3.645633768355729e-05
+  hidden angularVelocity_31 -0.00012529371216273575 -0.00017242794412128962 -0.00012639921397483372
+  hidden translation_33 0.1122 -0.319729 0.182338
+  hidden rotation_33 1 0 0 0.12278341196906165
+  hidden linearVelocity_33 -8.072622447833568e-06 2.769554275015989e-05 -3.166313212733339e-05
+  hidden angularVelocity_33 -0.00012534948957762586 -0.00016588652603294552 -0.00013048963315436497
+  translation 0.29578173473035946 -0.9235066986657018 0.5710275178561866
+  rotation -0.05349242322945264 -0.08532712927016874 -0.994915997292009 0.6002525460985277
+  controller "big_python"
+}
+Solid {
+  translation 4.182651866080572 -2.612253009236213 0.1964443855328156
+  rotation 0 0 1 0.9999999999999999
+  children [
+    DEF BALL_GEOMETRY Shape {
+      appearance PBRAppearance {
+        baseColor 0.3 0.4 0.4
+        roughness 1
+        metalness 0
+      }
+      geometry Sphere {
+        radius 0.2
+        subdivision 2
+      }
+    }
+  ]
+  name "ball1"
+  boundingObject USE BALL_GEOMETRY
+  physics Physics {
+    density 991
+    mass 2
+  }
+  linearVelocity 0 0 0.003319388087769436
+}
+Solid {
+  translation 5.54 -1.87 0.14743897603090528
+  children [
+    USE BALL_GEOMETRY
+  ]
+  name "ball2"
+  boundingObject USE BALL_GEOMETRY
+  physics Physics {
+  }
+  linearVelocity 0 0 -0.00036605186231934304
+}

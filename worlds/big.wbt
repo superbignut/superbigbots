@@ -1,0 +1,49 @@
+#VRML_SIM R2023b utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/Floor.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/boston_dynamics/spot/protos/Spot.proto"
+
+WorldInfo {
+}
+Viewpoint {
+  orientation 0.05746828237251279 -0.0011495189207266913 -0.9983466708150049 3.1815265380128093
+  position -271.44254421221 -3.4326647830904267 1.7302933027194862
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+Floor {
+  size 10000 10000
+}
+Spot {
+  hidden position_0_0 -0.16238878245007574
+  hidden position_0_1 0.1137912354271271
+  hidden position_0_2 -0.18204725457472315
+  hidden position_0_3 0.15138138553862202
+  hidden rotation_18 0 0 -1 0.162388782450075
+  hidden position_18_0 -0.041586329492549035
+  hidden rotation_19 -0.9999999999999999 0 0 0.0415863294925496
+  hidden position_19_1 -0.019747538642730156
+  hidden rotation_21 -1 0 0 0.01974753864272191
+  hidden rotation_22 0 0 1 0.11379123542712774
+  hidden position_22_0 -0.041597651990987194
+  hidden rotation_23 -1 0 0 0.04159765199099038
+  hidden position_23_1 -0.01974813934645203
+  hidden rotation_25 -1 0 0 0.019748139346459827
+  hidden rotation_26 0 0 -1 0.182047254574724
+  hidden position_26_0 -0.0935993041085944
+  hidden rotation_27 -0.9999999999999999 0 0 0.09359930410859675
+  hidden position_27_1 0.1227372439000729
+  hidden rotation_29 1 0 0 0.12273724390007366
+  hidden rotation_30 0 0 1 0.15138138553862182
+  hidden position_30_0 -0.09359989358258214
+  hidden rotation_31 -1 0 0 0.09359989358258121
+  hidden position_31_1 0.12273237604241993
+  hidden rotation_33 1 0 0 0.12273237604241881
+  translation -281.93694254315585 -3.703362802984842 0.571031300372509
+  rotation -0.05352155002244516 -0.0852679194663331 -0.994919507092447 0.6002732425893996
+  controller "big_python"
+}
