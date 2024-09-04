@@ -6,10 +6,17 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/project
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/boston_dynamics/spot/protos/Spot.proto"
 
 WorldInfo {
+  contactProperties [
+    ContactProperties {
+      material2 "dumbbell"
+      frictionRotation 1 1
+      rollingFriction 1 1 1
+    }
+  ]
 }
 Viewpoint {
-  orientation 0.2603437469361842 0.0005977547039494055 -0.9655158083224439 3.0245965070560117
-  position 14.854621237841025 0.4774221546578908 7.3802384004687305
+  orientation 0.2207928783651886 -0.012792838702612467 -0.975236816440573 3.122162689591138
+  position 16.949348863093473 -0.7732627841369314 8.070571518043257
 }
 TexturedBackground {
 }
@@ -18,11 +25,16 @@ TexturedBackgroundLight {
 Floor {
   size 10000 10000
 }
+Pose {
+}
 Solid {
   translation -4 0.4 0
   children [
     DEF WALL Shape {
       appearance PBRAppearance {
+        baseColor 0 0.666667 1
+        roughness 0.5
+        metalness 0
       }
       geometry Box {
         size 0.1 10 2
@@ -40,69 +52,57 @@ Solid {
   name "wall2"
 }
 Spot {
-  hidden linearVelocity_0 -1.7910738170319523e-05 1.4208108294062181e-05 -1.880343846866571e-05
-  hidden angularVelocity_0 9.576682617588293e-06 -2.1726474031564058e-06 -0.00015769925140104063
+  hidden position_0_0 -6.208761105856116e-06
+  hidden position_0_1 4.114797400417108e-06
+  hidden position_0_2 -7.460207354093029e-06
+  hidden position_0_3 7.933108941065164e-06
   hidden translation_18 -0.0528 0.0006 0
-  hidden rotation_18 0 0 -1 0.16240766091134867
-  hidden linearVelocity_18 -2.81001794695539e-05 -2.830595565781949e-05 -1.9555238073661322e-05
-  hidden angularVelocity_18 1.5013614119339915e-05 -1.1242062881953095e-05 -0.00015834305068420198
+  hidden rotation_18 0 0 -1 6.208761532854663e-06
+  hidden position_18_0 6.685259583523855e-06
   hidden translation_19 0 -0.00053 0
-  hidden rotation_19 -0.9999999999999999 0 0 0.04155633600464708
-  hidden linearVelocity_19 3.7529903297033044e-06 -1.665323765179579e-05 -1.0391613793189712e-05
-  hidden angularVelocity_19 6.0437367089563e-05 4.292215379020519e-05 -0.000148040255215651
+  hidden rotation_19 1 0 0 6.6852926696855924e-06
+  hidden position_19_1 1.2422511500376011e-05
   hidden translation_21 -0.1122 -0.319729 0.182338
-  hidden rotation_21 -1 0 0 0.019719276818612293
-  hidden linearVelocity_21 7.126632873321477e-06 3.404381331875543e-06 -1.0473405023569086e-05
-  hidden angularVelocity_21 6.206813287088953e-05 3.8399777328748186e-05 -0.00014546765814021088
+  hidden rotation_21 1 0 0 1.2422528891757647e-05
   hidden translation_22 0.0528 0.0006 0
-  hidden rotation_22 0 0 1 0.11382126350025179
-  hidden linearVelocity_22 -6.0721534083887755e-05 -7.720264409028462e-06 -2.0454498967645614e-05
-  hidden angularVelocity_22 2.1949686977811672e-05 3.221304603872353e-07 -0.00015976932803015266
+  hidden rotation_22 0 0 1 4.114771587190407e-06
+  hidden position_22_0 6.276349066759691e-06
   hidden translation_23 0 -0.00053 0
-  hidden rotation_23 -0.9999999999999999 0 0 0.04154722621752435
-  hidden linearVelocity_23 -5.7430053467905414e-05 2.023746030248208e-05 -3.820659708188831e-05
-  hidden angularVelocity_23 -8.18090528689721e-05 -0.00016207640582063674 -0.00013578406655331704
+  hidden rotation_23 0.9999999999999999 0 0 6.2763436227291035e-06
+  hidden position_23_1 1.1896070331112935e-05
   hidden translation_25 0.1122 -0.319729 0.182338
-  hidden rotation_25 -1 0 0 0.019705539773906173
-  hidden linearVelocity_25 -1.6535252755993056e-05 1.2457294043155197e-05 -3.544011084745095e-05
-  hidden angularVelocity_25 -7.596958301967684e-05 -0.00015969030639227606 -0.0001338013901544592
+  hidden rotation_25 0.9999999999999999 0 0 1.189605531873895e-05
   hidden translation_26 -0.0528 0.0006 0
-  hidden rotation_26 0 0 -1 0.18209585217355773
-  hidden linearVelocity_26 3.288043617409498e-05 2.9671468344140157e-05 -1.7083537833027604e-05
-  hidden angularVelocity_26 -2.8813455180790036e-06 -1.1289261419667367e-05 -0.00016339610690290383
+  hidden rotation_26 0 0 -1 7.46023030042061e-06
+  hidden position_26_0 1.2569450669299874e-05
   hidden translation_27 0 -0.00053 0
-  hidden rotation_27 -0.9999999999999999 0 0 0.09357294063182145
-  hidden linearVelocity_27 5.4368236868698855e-05 1.546485326870117e-05 -1.6509900460495163e-06
-  hidden angularVelocity_27 9.77995899931209e-05 0.00015152599842431762 -0.00013459033524424634
+  hidden rotation_27 1 0 0 1.2569445240487653e-05
+  hidden position_27_1 1.7639725990877246e-05
   hidden translation_29 -0.1122 -0.319729 0.182338
-  hidden rotation_29 1 0 0 0.1228024810218328
-  hidden linearVelocity_29 2.612924665687674e-05 1.4667753820504951e-05 -5.4456018096435105e-06
-  hidden angularVelocity_29 9.125340765622861e-05 0.00014737777644105915 -0.00013842734335996526
+  hidden rotation_29 0.9999999999999999 0 0 1.7639727511151085e-05
   hidden translation_30 0.0528 0.0006 0
-  hidden rotation_30 0 0 1 0.1514168075512658
-  hidden linearVelocity_30 -1.7887598838592558e-05 6.140446576148222e-05 -1.8292743871864592e-05
-  hidden angularVelocity_30 1.043140003568336e-05 9.77220971151114e-06 -0.00016195471941917903
+  hidden rotation_30 0 0 1 7.9331296764388e-06
+  hidden position_30_0 1.2694113855267102e-05
   hidden translation_31 0 -0.00053 0
-  hidden rotation_31 -1 0 0 0.09354092440340533
-  hidden linearVelocity_31 -3.096473023336049e-05 6.678242431540176e-05 -3.645633768355729e-05
-  hidden angularVelocity_31 -0.00012529371216273575 -0.00017242794412128962 -0.00012639921397483372
+  hidden rotation_31 0.9999999999999999 0 0 1.2694110222063431e-05
+  hidden position_31_1 1.7687314095347654e-05
   hidden translation_33 0.1122 -0.319729 0.182338
-  hidden rotation_33 1 0 0 0.12278341196906165
-  hidden linearVelocity_33 -8.072622447833568e-06 2.769554275015989e-05 -3.166313212733339e-05
-  hidden angularVelocity_33 -0.00012534948957762586 -0.00016588652603294552 -0.00013048963315436497
-  translation 0.29578173473035946 -0.9235066986657018 0.5710275178561866
-  rotation -0.05349242322945264 -0.08532712927016874 -0.994915997292009 0.6002525460985277
+  hidden rotation_33 1 0 0 1.7687320555024004e-05
+  translation 0.31824460870314614 -0.9501469703682033 0.6085220577585692
+  rotation -0.0013426698416134917 -0.0046803773563584795 -0.9999881455824856 0.5968676628538312
   controller "big_python"
 }
 Solid {
-  translation 4.182651866080572 -2.612253009236213 0.1964443855328156
-  rotation 0 0 1 0.9999999999999999
+  translation 4.182651866080572 -2.612253009236213 0.19686080041138837
+  rotation 0 0 1 0.9999999999999998
   children [
     DEF BALL_GEOMETRY Shape {
       appearance PBRAppearance {
-        baseColor 0.3 0.4 0.4
-        roughness 1
-        metalness 0
+        baseColorMap ImageTexture {
+          url [
+            "../../../微信图片_20231105210403.jpg"
+          ]
+        }
       }
       geometry Sphere {
         radius 0.2
@@ -116,10 +116,11 @@ Solid {
     density 991
     mass 2
   }
-  linearVelocity 0 0 0.003319388087769436
+  linearVelocity 0 0 -3.279323152583335e-09
 }
 Solid {
-  translation 5.54 -1.87 0.14743897603090528
+  translation 3.7864182548933183 -3.602422366776703 0.14740219915653827
+  rotation 0.6934112257609214 0.19490541515021845 0.6936805829298219 -2.756242186098672
   children [
     USE BALL_GEOMETRY
   ]
@@ -127,5 +128,49 @@ Solid {
   boundingObject USE BALL_GEOMETRY
   physics Physics {
   }
-  linearVelocity 0 0 -0.00036605186231934304
+  linearVelocity 0 0 -1.0795775139801485e-16
+}
+Solid {
+  translation 0.914078 -2.037813299944806 0.18886338696474317
+  rotation -0.112047818009513 0.7034128562130875 -0.7018943226679166 -2.9298871013308463
+  children [
+    DEF GO Group {
+      children [
+        Pose {
+          translation 0 0 0.25
+          children [
+            DEF Pose1 Shape {
+              geometry Sphere {
+                radius 0.2
+              }
+            }
+          ]
+        }
+        Pose {
+          translation 0 0 -0.25
+          children [
+            USE Pose1
+          ]
+        }
+        Shape {
+          appearance PBRAppearance {
+          }
+          geometry Cylinder {
+            height 0.5
+            radius 0.05
+          }
+        }
+      ]
+    }
+  ]
+  name "handle"
+  contactMaterial "dumbbell"
+  boundingObject USE GO
+  physics Physics {
+    density 200
+    damping Damping {
+    }
+  }
+  linearVelocity 0 2.6062186445361884e-06 5.62135254642537e-06
+  angularVelocity -1.3031295206076468e-05 -1.0072384087796234e-07 2.1164646134772273e-11
 }
