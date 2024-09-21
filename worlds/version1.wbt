@@ -4,6 +4,8 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/project
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/Floor.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/boston_dynamics/spot/protos/Spot.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/appearances/protos/Parquetry.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/humans/pedestrian/protos/Pedestrian.proto"
 
 WorldInfo {
   contactProperties [
@@ -15,8 +17,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation 0.2207928783651886 -0.012792838702612467 -0.975236816440573 3.122162689591138
-  position 16.949348863093473 -0.7732627841369314 8.070571518043257
+  orientation 0.11758410173320111 -0.011981322309372853 -0.9929906479596448 3.095161469892983
+  position 21.59615911771733 1.0529031091437973 6.028177705530109
 }
 TexturedBackground {
 }
@@ -24,8 +26,8 @@ TexturedBackgroundLight {
 }
 Floor {
   size 10000 10000
-}
-Pose {
+  appearance Parquetry {
+  }
 }
 Solid {
   translation -4 0.4 0
@@ -52,125 +54,67 @@ Solid {
   name "wall2"
 }
 Spot {
-  hidden position_0_0 -6.208761105856116e-06
-  hidden position_0_1 4.114797400417108e-06
-  hidden position_0_2 -7.460207354093029e-06
-  hidden position_0_3 7.933108941065164e-06
-  hidden translation_18 -0.0528 0.0006 0
-  hidden rotation_18 0 0 -1 6.208761532854663e-06
-  hidden position_18_0 6.685259583523855e-06
-  hidden translation_19 0 -0.00053 0
-  hidden rotation_19 1 0 0 6.6852926696855924e-06
-  hidden position_19_1 1.2422511500376011e-05
-  hidden translation_21 -0.1122 -0.319729 0.182338
-  hidden rotation_21 1 0 0 1.2422528891757647e-05
-  hidden translation_22 0.0528 0.0006 0
-  hidden rotation_22 0 0 1 4.114771587190407e-06
-  hidden position_22_0 6.276349066759691e-06
-  hidden translation_23 0 -0.00053 0
-  hidden rotation_23 0.9999999999999999 0 0 6.2763436227291035e-06
-  hidden position_23_1 1.1896070331112935e-05
-  hidden translation_25 0.1122 -0.319729 0.182338
-  hidden rotation_25 0.9999999999999999 0 0 1.189605531873895e-05
-  hidden translation_26 -0.0528 0.0006 0
-  hidden rotation_26 0 0 -1 7.46023030042061e-06
-  hidden position_26_0 1.2569450669299874e-05
-  hidden translation_27 0 -0.00053 0
-  hidden rotation_27 1 0 0 1.2569445240487653e-05
-  hidden position_27_1 1.7639725990877246e-05
-  hidden translation_29 -0.1122 -0.319729 0.182338
-  hidden rotation_29 0.9999999999999999 0 0 1.7639727511151085e-05
-  hidden translation_30 0.0528 0.0006 0
-  hidden rotation_30 0 0 1 7.9331296764388e-06
-  hidden position_30_0 1.2694113855267102e-05
-  hidden translation_31 0 -0.00053 0
-  hidden rotation_31 0.9999999999999999 0 0 1.2694110222063431e-05
-  hidden position_31_1 1.7687314095347654e-05
-  hidden translation_33 0.1122 -0.319729 0.182338
-  hidden rotation_33 1 0 0 1.7687320555024004e-05
-  translation 0.31824460870314614 -0.9501469703682033 0.6085220577585692
-  rotation -0.0013426698416134917 -0.0046803773563584795 -0.9999881455824856 0.5968676628538312
-  controller "big_python"
+  hidden position_0_0 -0.40000893517774355
+  hidden position_0_1 0.40000919763016113
+  hidden position_0_2 -0.4000146784763931
+  hidden position_0_3 0.40001477655641554
+  hidden linearVelocity_0 -0.0002740996434156503 -0.0021739646950106953 0.0002082763438649567
+  hidden angularVelocity_0 0.019475436953344537 -0.002603704141724654 0.00016405960935459796
+  hidden rotation_18 0 0 -1 0.40000893517774333
+  hidden position_18_0 -0.9899963085375006
+  hidden linearVelocity_18 -0.0002800176723640732 -0.002030708898756527 0.0039039959044910788
+  hidden angularVelocity_18 0.019526975474964237 -0.0025921457900875216 0.00016545211861448457
+  hidden rotation_19 -0.9999999999999999 0 0 0.9899963085375006
+  hidden position_19_1 1.5900239961295242
+  hidden linearVelocity_19 -0.0004062214251273847 -0.002970372716545136 0.005099583646386427
+  hidden angularVelocity_19 0.019578234327511664 -0.00258048532054853 0.00016684487463042752
+  hidden rotation_21 1 0 0 1.5900239961295242
+  hidden linearVelocity_21 -0.0002444078673040552 -0.0018187834720633678 0.0056060917051992025
+  hidden angularVelocity_21 0.019630716515020047 -0.0027257273188466304 0.0001582964524400642
+  hidden rotation_22 0 0 1 0.40000919763016074
+  hidden position_22_0 -0.9899996797272037
+  hidden linearVelocity_22 -0.00027700498602995573 -0.0019989058621857868 0.001987712611594602
+  hidden angularVelocity_22 0.0194207588978152 -0.002620034365750555 0.0001616209640236936
+  hidden rotation_23 -0.9999999999999999 0 0 0.9899996797272039
+  hidden position_23_1 1.590023684864567
+  hidden linearVelocity_23 -0.00039383349556977197 -0.002949351989496074 -0.0007065421969842124
+  hidden angularVelocity_23 0.019365936103834067 -0.002636233743081908 0.00015918653327872453
+  hidden rotation_25 1 0 0 1.5900236848645668
+  hidden linearVelocity_25 -0.00023891533991958404 -0.0018032789012395588 -0.000978660748902391
+  hidden angularVelocity_25 0.019388912939875658 -0.002784322512526416 0.00015404837572380314
+  hidden rotation_26 0 0 -1 0.4000146784763931
+  hidden position_26_0 -0.9900059042220821
+  hidden linearVelocity_26 -0.00025338449873001887 -0.002069137413192666 -0.0010212212620394762
+  hidden angularVelocity_26 0.01955915579876499 -0.00257535716643685 0.00016627110267419993
+  hidden rotation_27 -0.9999999999999999 0 0 0.990005904222082
+  hidden position_27_1 1.5900363977742866
+  hidden linearVelocity_27 -0.00038869113550173 -0.0030031773824539232 0.0004189966170254364
+  hidden angularVelocity_27 0.019642548065375753 -0.002546927398527905 0.00016848125875762226
+  hidden rotation_29 1 0 0 1.5900363977742864
+  hidden linearVelocity_29 -0.00023717559639996788 -0.0018372454354790163 0.0011747472634943484
+  hidden angularVelocity_29 0.019724762073049334 -0.0027650509997319273 0.0001640437008959784
+  hidden rotation_30 0 0 1 0.40001477655641526
+  hidden position_30_0 -0.9900060455300628
+  hidden linearVelocity_30 -0.00025147326542343757 -0.002033462587866322 -0.0029374234522921406
+  hidden angularVelocity_30 0.019387109227844247 -0.002621393390272587 0.00016003927268555835
+  hidden rotation_31 -1 0 0 0.9900060455300627
+  hidden position_31_1 1.5900360750286713
+  hidden linearVelocity_31 -0.00038050111113179685 -0.002967641149570264 -0.005387683018577113
+  hidden angularVelocity_31 0.019298681285909135 -0.002638945914289394 0.00015602477520315627
+  hidden rotation_33 1 0 0 1.5900360750286713
+  hidden linearVelocity_33 -0.0002346292205942534 -0.0018114387020773007 -0.005410662964909643
+  hidden angularVelocity_33 0.01933654922980821 -0.0028640096598943066 0.00015583237201866051
+  translation 0.36052930058714666 -0.938878884361713 0.08505679516163332
+  rotation -0.007729450764176388 -0.01836729893765997 0.999801429245137 0.26896846628812465
+  controller "main_control"
+  supervisor TRUE
 }
-Solid {
-  translation 4.182651866080572 -2.612253009236213 0.19686080041138837
-  rotation 0 0 1 0.9999999999999998
-  children [
-    DEF BALL_GEOMETRY Shape {
-      appearance PBRAppearance {
-        baseColorMap ImageTexture {
-          url [
-            "../../../微信图片_20231105210403.jpg"
-          ]
-        }
-      }
-      geometry Sphere {
-        radius 0.2
-        subdivision 2
-      }
-    }
+DEF human1 Pedestrian {
+  translation 4 5 1.27
+  rotation 0 0 1 -1.5707996938995747
+  controller "human_controller"
+  controllerArgs [
+    " --speed = 4"
+    "--trajectory=4 5, 4 -4"
   ]
-  name "ball1"
-  boundingObject USE BALL_GEOMETRY
-  physics Physics {
-    density 991
-    mass 2
-  }
-  linearVelocity 0 0 -3.279323152583335e-09
-}
-Solid {
-  translation 3.7864182548933183 -3.602422366776703 0.14740219915653827
-  rotation 0.6934112257609214 0.19490541515021845 0.6936805829298219 -2.756242186098672
-  children [
-    USE BALL_GEOMETRY
-  ]
-  name "ball2"
-  boundingObject USE BALL_GEOMETRY
-  physics Physics {
-  }
-  linearVelocity 0 0 -1.0795775139801485e-16
-}
-Solid {
-  translation 0.914078 -2.037813299944806 0.18886338696474317
-  rotation -0.112047818009513 0.7034128562130875 -0.7018943226679166 -2.9298871013308463
-  children [
-    DEF GO Group {
-      children [
-        Pose {
-          translation 0 0 0.25
-          children [
-            DEF Pose1 Shape {
-              geometry Sphere {
-                radius 0.2
-              }
-            }
-          ]
-        }
-        Pose {
-          translation 0 0 -0.25
-          children [
-            USE Pose1
-          ]
-        }
-        Shape {
-          appearance PBRAppearance {
-          }
-          geometry Cylinder {
-            height 0.5
-            radius 0.05
-          }
-        }
-      ]
-    }
-  ]
-  name "handle"
-  contactMaterial "dumbbell"
-  boundingObject USE GO
-  physics Physics {
-    density 200
-    damping Damping {
-    }
-  }
-  linearVelocity 0 2.6062186445361884e-06 5.62135254642537e-06
-  angularVelocity -1.3031295206076468e-05 -1.0072384087796234e-07 2.1164646134772273e-11
 }
