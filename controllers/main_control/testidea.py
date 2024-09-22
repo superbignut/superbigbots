@@ -8,6 +8,12 @@
     并且，对真实交互的数据的重要性要进行方法，这里可以体现在，reward上，也可以体现在 buffer的统计上
 
     感觉本质上还是一个特征提取的操作
+
+    如果只使用原来的算法，很可能最开始的预训练的速度很慢，可以想办法加快一点，对stdp进行修改
+
+    1的脉冲次数 要小于0的次数很多， 这里怀疑可能跟 1 的图像面积小有关系
+
+    这里的面积的大小与出现的次数还没有关系
 """
 import collections
 import numpy as np
@@ -21,7 +27,7 @@ from SPAIC.spaic.Learning.Learner import Learner
 from SPAIC.spaic.Library.Network_saver import network_save
 from SPAIC.spaic.Library.Network_loader import network_load
 from SPAIC.spaic.IO.Dataset import MNIST as dataset
-from SPAIC.spaic.IO.Dataset import CUSTOM_MNIST
+from SPAIC.spaic.IO.Dataset import CUSTOM_MNIST, NEW_DATA_MNIST
 import gymnasium as gym
 import matplotlib.pyplot as plt
 from torch.utils.tensorboard import SummaryWriter
@@ -38,7 +44,7 @@ for file in os.listdir(log_path):
 root = './SPAIC/spaic/Datasets/MNIST'
 train_set = CUSTOM_MNIST(root, is_train=True) # 这里加一个mast 只要01
 test_set =CUSTOM_MNIST(root, is_train=False)
-
+new_data_set = NEW_DATA_MNIST(root, is_train=False) # 引入新的数据 包括012
 device = torch.device("cuda")
 
 
@@ -50,6 +56,8 @@ bat_size = 1
 
 train_loader = spaic.Dataloader(train_set, batch_size=bat_size, shuffle=False, drop_last=False)
 test_loader = spaic.Dataloader(test_set, batch_size=bat_size, shuffle=False)
+newdata_loader = spaic.Dataloader(new_data_set,batch_size=bat_size,shuffle=False)
+
 backend = spaic.Torch_Backend(device)
 backend.dt = 0.1
 run_time = 256 * backend.dt 
@@ -73,9 +81,9 @@ class TestNet(spaic.Network):
 
         self.connection1 = spaic.Connection(self.input, self.layer1, link_type='full', weight=(np.random.rand(label_num, 784) * 0.3)) # 100 * 784
         
-        self.connection2 = spaic.Connection(self.layer1, self.layer2, link_type='full', weight=    np.diag(np.ones(label_num)) * 22.5   ) 
+        self.connection2 = spaic.Connection(self.layer1, self.layer2, link_type='full', weight=np.diag(np.ones(label_num)) * 22.5   )
         
-        self.connection3 = spaic.Connection(self.layer2, self.layer1, link_type='full', weight=(   np.ones((label_num, label_num)) - np.diag(np.ones(label_num))    ) * (-120)) # 起到一个抑制的作用，除了1-1的前一个，侧向抑制，并起到竞争的效果
+        self.connection3 = spaic.Connection(self.layer2, self.layer1, link_type='full', weight=( np.ones((label_num, label_num)) - np.diag(np.ones(label_num)) ) * (-120)) # 起到一个抑制的作用，除了1-1的前一个，侧向抑制，并起到竞争的效果
 
         self._learner = Learner(algorithm='nearest_online_stdp', trainable=self.connection1, run_time=run_time) # 这里也只是训练 从输入到第一层的连接，其余层不变
 
@@ -84,10 +92,6 @@ class TestNet(spaic.Network):
         self.mon_weight = spaic.StateMonitor(self.connection1, 'weight', nbatch=-1)
         
         self.set_backend(backend)
-
-    
-        # self.buffer0 = [] # 用来存放 0的投票神经元
-        # self.buffer1 = [] # 用来存放 1的投票神经元
 
         self.buffer = [[],[]] # 0, 1 投票神经元的buffer
 
@@ -109,10 +113,10 @@ agent = TestNet() # 这里如果一个网络 不行，也可以考虑使用第�
 im = None
 
 file_name = 'save/testidea' # 权重的保存文件
-buffer_name = 'buffer.pth'
+buffer_name = 'buffer.pth' # buffer的保存文件
 
-train_num = 400
-eval_num = 100
+train_num = 1000 # 800次的时候可以达到0.65的成功率 这里应该想办法怎么既能减小 训练次数又能 增大预训练的效率
+
 def TestNet_Init(flag='train'):
     """
         这个函数完成对0 1数据的初始化操作， 也就是希望网路可以达到对0 1的初步分类作用
@@ -130,7 +134,6 @@ def TestNet_Init(flag='train'):
                 output = agent.step(data)
 
                 agent.buffer[label[0]].append(output) # label[0]的第一个维度是batch
-
                 im = agent.mon_weight.plot_weight(time_id=-1, linewidths=0, linecolor='white',
                             reshape=True, n_sqrt=int(np.sqrt(label_num)), side=28, im=im, wmax=1) #把权重 画出来 100 * 784 = 100 * 28 * 28
                 pbar.update()
@@ -138,30 +141,42 @@ def TestNet_Init(flag='train'):
                     break #   
         # network_save(Net=agent,filename='saveidea',save_weight=True)
 
-        # agent.save_state(filename=file_name) # 这里需要手动删除保存的文件夹
+        agent.save_state(filename=file_name) # 这里需要手动删除保存的文件夹
         torch.save(agent.buffer, buffer_name) # buffer 也需要保存起来
 
     elif flag == 'load':
-        # agent.state_from_dict(filename=file_name, device=device)
+        print("加载预训练数据和buffer")
+        agent.state_from_dict(filename=file_name, device=device)
         agent.buffer = torch.load(buffer_name)
 
+    assign_label_update() 
+    
 
+def assign_label_update(newoutput=None, newlabel=None, weight=0):
+    # 如果没有新的数据输入，则就是对 assign_label 进行一次计算，否则 会根据权重插入新数据，进而计算
+    if newoutput != None:
+        agent.buffer[newlabel].append(newoutput)
     avg_buffer = [sum(agent.buffer[i]) / len(agent.buffer[i]) for i in range(len(agent.buffer))] # sum_buffer 是一个求和之后 取平均的tensor  n * 1 * 100
     # avg_buffer = [sum_buffer[i] / len(agent.buffer[i]) for i in range(len(agent.buffer))]
     assign_label = torch.argmax(torch.cat(avg_buffer, 0), 0) # n 个1*100 的list在第0个维度合并 -> n*100的tensor, 进而在第0个维度比哪个更大, 返回一个1维的tensor， 内容是index，0-n， 目前是0和1
     # 这里的 100 个 0 和1 也就代表了， 当前那个神经元 可以代表的 类别是什么
     agent.assign_label = assign_label # 初始化结束
 
+
+
 eval_acc = []
 
-def TestNet_Eval():
+def TestNet_Eval(eval_num = 50):
     # 这里测试一下对0和1的准确率
+    if eval_num ==0:
+        print("跳过检测环节")
+        return
     global im
     right_predict = 0
     
-    print("开始检测")
+    print("开始检测训练效果")
 
-    with torch.no_grad():
+    with torch.no_grad(): # 这里存粹的测试，不会更新权重 没有 drop层 所以与使用 eval 是一样的效果
         pbar = tqdm(total=len(test_loader))
         for index, item in enumerate(test_loader):
             data, label = item
@@ -175,24 +190,76 @@ def TestNet_Eval():
             predict_label = torch.argmax(torch.tensor(temp_cnt))
             # print("... ", label, predict_label)
             if label[0] == predict_label:
-                right_predict+=1
-            eval_acc.append(right_predict / eval_num)
+                right_predict += 1
+            eval_acc.append(right_predict / (1+index))
             if index > eval_num:
                 break
             pbar.update()
-    print(" 总数为：", eval_num ," 预测成功为：",right_predict)
-    plt.figure(2)
-    plt.plot(eval_acc)
-    plt.show()
+    print(" 总数为：", eval_num+2 ," 预测成功为：",right_predict)
+    np.savetxt('./eval_acc.txt', fmt='%f', delimiter=',',X=eval_acc)
+
+
+nd_eval_acc = []
+
+def ND_TestNet_Eval_And_Train(nd_eval_num = 80):
+    # 从这里开始增加2 作为新数据，并把2 归属与 1 的label
+    global im
+    right_predict = 0
+    
+    print("新数据集测试与微调")
+
+    pbar = tqdm(total=len(newdata_loader))
+    for index, item in enumerate(newdata_loader):
+        data, label = item
+        if label[0] != 0:
+            label[0] = 1 # 把2 也归为1
+        output = agent.step(data)
+        im = agent.mon_weight.plot_weight(time_id=-1, linewidths=0, linecolor='white',
+                            reshape=True, n_sqrt=int(np.sqrt(label_num)), side=28, im=im, wmax=1) #把权重 画出来 100 * 784 = 100 * 28 * 28
+
+        temp_cnt = [0 for _ in range(len(agent.buffer))] # 维度是2
+        # 这里的每一个输出[1,2,3,4,5...], 就像是在投票，由于每一个位置类别已经确定，现在，只需要把每个类别的投票的总次数加起来，即可
+        for i in range(len(agent.assign_label)):
+            temp_cnt[agent.assign_label[i]] += output[0, i] # 第一个维度是batch, 
+
+        predict_label = torch.argmax(torch.tensor(temp_cnt))
+        # print("... ", label, predict_label)
+        if label[0] == predict_label:
+            right_predict += 1
+
+        # 这里要使用真实标签对数据对投票集进行补充或修改
+        assign_label_update(output, label[0], weight=0) # 权重的体现，可以是乘在output上，也可以是 copy n个插入buffer
+
+        # 这里准备Todo 如果预测错误，可以采取一些迅速的补救措施
+
+        # else
+
+        # 预测正确和错误也可以 不断调整 更新的权重
+
+        nd_eval_acc.append(right_predict / (1+index))
+        if index > nd_eval_num:
+            break
+        pbar.update()
+
+    print(" 总数为：", nd_eval_num+2 ," 预测成功为：", right_predict)
+    np.savetxt('./nd_eval_acc.txt', fmt='%f', delimiter=',',X=nd_eval_acc)
+
+def load_run():
+    TestNet_Init('load') # 训练
+    TestNet_Eval(eval_num=0) # 预测
+    ND_TestNet_Eval_And_Train(nd_eval_num=2000) # 加入新数据微调
+
+def train_run():
+    TestNet_Init('train') # 训练
+    TestNet_Eval() # 预测
+    ND_TestNet_Eval_And_Train() # 加入新数据微调
+    
+def just_train():
+    TestNet_Init('train') # 训练
 
 if __name__ == '__main__':
-    TestNet_Init('load')
-    TestNet_Eval()
-    print("Yes")
-
-
-
-
+    load_run()
+    
 
 
 
