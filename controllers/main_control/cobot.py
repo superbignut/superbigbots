@@ -3,6 +3,7 @@ from device_init import *
 from action_define import *
 from collections import deque
 from action_define import robot as mydog
+from cobot_emo_net import EMONET
 import numpy as np
 import math
 import time
@@ -30,21 +31,25 @@ class Env:
         self.rela = rela
         self.human = human
         self.dog = dog
+        self.dim = dim # 这里的dim 指的是 过去多少个时间片的数据
 
         self.user_cmd = None # 检测到用户输入命令 0-len(USER_CMD_DICT)
         self.gyro_err = 0 # 检测到 陀螺仪异常 0 1
 
         self.user_cmd_thread = threading.Thread(target=self._get_user_cmd, name="_get_user_cmd") # 线程中不断修改用户当下的指令，只保存最近的这个指令
         self.gyro_err_thread = threading.Thread(target=self._get_gyro, name="_get_gyro") # gyro 检测异常振动，这里是在模拟，被踢的时候
+        self.xy_pos_limit = 20 # 归一化常数
+        self.xy_speed_limit = 4 # 根据实际修改 # 这个速度可能要加快一点，现在的人的移动速度有点太慢了
+        self.cmd_limit = len(USER_CMD_DICT)-1 # 指令归一化
 
         # if self.rela == True:
         assert self.rela is True, "rela must be true"
 
-        self.human_position = deque([np.array(human.getPosition()[0:2]) - np.array(dog.getPosition()[0:2])  for _ in range(dim)], maxlen=dim) # 相对位置初始化
+        self.human_position = deque([ np.clip(np.array(human.getPosition()[0:2]) - np.array(dog.getPosition()[0:2]),-self.xy_pos_limit,self.xy_pos_limit)/self.xy_pos_limit  for _ in range(dim)], maxlen=dim) # 相对位置初始化
 
         self.human_speed = deque([np.array([0,0]) for _ in range(dim)], maxlen=dim) # 相对速度初始化
 
-        self.human_cmd = deque([[USER_CMD_DICT['null']] for _ in range(dim)], maxlen=dim) # 指令序列初始化
+        self.human_cmd = deque([[USER_CMD_DICT['null']/self.cmd_limit] for _ in range(dim)], maxlen=dim) # 指令序列初始化
 
         self.dog_gyro = deque([[0] for _ in range(dim)], maxlen=dim) # 指令序列初始化
 
@@ -58,12 +63,12 @@ class Env:
 
 
     def get_input(self):
-        # 每次更新一次queue 尾部的数据， 并去除队头的数据
-        self.human_position.append(np.array(self.human.getPosition()[0:2]) - np.array(self.dog.getPosition()[0:2])) # 10 * 2 
+        # 每次更新一次queue 尾部的数据， 并去除队头的数据, 返回的是一个 shape = (10, 6) 的np.array
+        self.human_position.append(np.clip(np.array(self.human.getPosition()[0:2]) - np.array(self.dog.getPosition()[0:2]), -self.xy_pos_limit, self.xy_pos_limit)/self.xy_pos_limit ) # 10 * 2 
         
-        self.human_speed.append((self.human_position[-1] - self.human_position[-2])) # 这里直接用差值作为相对速度了， 暂时 没有考虑狗的速度 # 10 * 2
+        self.human_speed.append(np.clip(self.human_position[-1] - self.human_position[-2], -self.xy_speed_limit, self.xy_speed_limit) / self.xy_speed_limit ) # 这里直接用差值作为相对速度了， 暂时 没有考虑狗的速度 # 10 * 2
 
-        self.human_cmd.append([self.user_cmd]) # 10 * 1
+        self.human_cmd.append([self.user_cmd / self.cmd_limit]) # 10 * 1
 
         self.dog_gyro.append([self.gyro_err]) # 10 * 1
 
@@ -77,7 +82,7 @@ class Env:
 
             if key == ord('A'):
                 self.user_cmd = USER_CMD_DICT["sit_down"]
-                time.sleep(0.5) 
+                time.sleep(0.5)  #  这里的sleep 时间可以设置的和 time_step 有些关系
             elif key == ord('B'):
                 self.user_cmd = USER_CMD_DICT["give_paw"]
                 time.sleep(0.5)
@@ -92,30 +97,15 @@ class Env:
                 time.sleep(0.5)
                 self.gyro_err = 0
 
-class REMONET:
-    def __init__(self) -> None:
-        # 两个网络的定义都在这里
-        pass
 
-    def get_emotion(self, state):
-        # 从emo网络 获得emo输出
-        return 0
-    
-    def get_reward(self):
-        # 从reward 网络获得 reward输出
-        pass
-    
-    def update(self):
-        # 根据交互结果进行更新reward
-        pass
 
 class Cobot:
     # 二阶段机器人
 
     def __init__(self, webots_robot) -> None:
         self.webots_robot = webots_robot # 仿真机器人对象
-        self.user_cmd = None # 
-        self.emo_model = REMONET()
+        self.user_cmd = USER_CMD_DICT["null"] # 
+        self.emo_model = EMONET() # 用于情感输出的spaic在线学习投票网络
 
     def step(self, state):
         # 读取输入
@@ -124,9 +114,10 @@ class Cobot:
         # 生成二阶动作
         # --- 等待交互结束 ---
         # 交互结果更rstdp新情感模型
+        print(state, state.shape)
         if self.user_cmd == USER_CMD_DICT["null"]:
             # 没有指令的时候 趴下
-            lie_down(1.0) #
+            sit_down(1.0) #
         else:
             # 一阶段的动作
             self._cmd_to_action_1(self.user_cmd) # 启动一个线程
