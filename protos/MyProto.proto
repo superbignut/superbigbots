@@ -1,0 +1,64 @@
+#VRML_SIM R2023b utf8
+# Describe the functionality of your PROTO here.
+
+EXTERNPROTO "C:/Users/admin/Desktop/ZJU/superbigbots/protos/Pedestrian.proto"
+
+PROTO MyProto [
+  field SFVec3f translation 0 0 1.27
+  field SFRotation rotation 0 0 1 0
+  field SFString name "pedestrian"
+  field SFString controller "<generic>"
+  field MFString controllerArgs [ ]
+  field SFColor shirtColor 0.25 0.55 0.2
+  field SFColor pantsColor 0.24 0.25 0.5
+  field SFColor shoesColor 0.28 0.15 0.06
+  field SFColor skinColor 1 0.75 0.7
+  field SFBool enableBoundingObject FALSE
+  field MFNode bodySlot [ ]
+  field MFNode leftHandSlot [ ]
+  field MFNode rightHandSlot [ ]
+  field SFFloat rightLegAngle 0
+  field SFFloat rightLowerLegAngle 0
+  field SFFloat rightFootAngle 0
+  field SFFloat leftLegAngle 0
+  field SFFloat leftLowerLegAngle 0
+  field SFFloat leftFootAngle 0
+  field SFFloat rightArmAngle 0
+  field SFFloat rightLowerArmAngle 0
+  field SFFloat rightHandAngle 0
+  field SFFloat leftArmAngle 0
+  field SFFloat leftLowerArmAngle 0
+  field SFFloat leftHandAngle 0
+  field SFFloat headAngle 0
+
+]
+{
+  Pedestrian {
+    translation IS translation
+    rotation IS rotation
+    name IS name
+    controller IS controller
+    controllerArgs IS controllerArgs
+    shirtColor IS shirtColor
+    pantsColor IS pantsColor
+    shoesColor IS shoesColor
+    skinColor IS skinColor
+    enableBoundingObject IS enableBoundingObject
+    bodySlot IS bodySlot
+    leftHandSlot IS leftHandSlot
+    rightHandSlot IS rightHandSlot
+    rightLegAngle IS rightLegAngle
+    rightLowerLegAngle IS rightLowerLegAngle
+    rightFootAngle IS rightFootAngle
+    leftLegAngle IS leftLegAngle
+    leftLowerLegAngle IS leftLowerLegAngle
+    leftFootAngle IS leftFootAngle
+    rightArmAngle IS rightArmAngle
+    rightLowerArmAngle IS rightLowerArmAngle
+    rightHandAngle IS rightHandAngle
+    leftArmAngle IS leftArmAngle
+    leftLowerArmAngle IS leftLowerArmAngle
+    leftHandAngle IS leftHandAngle
+    headAngle IS headAngle
+  }
+}

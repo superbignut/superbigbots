@@ -1,0 +1,75 @@
+#VRML_SIM R2023b utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/Floor.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/boston_dynamics/spot/protos/Spot.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/appearances/protos/Parquetry.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/humans/pedestrian/protos/Pedestrian.proto"
+
+WorldInfo {
+  contactProperties [
+    ContactProperties {
+      material2 "dumbbell"
+      frictionRotation 1 1
+      rollingFriction 1 1 1
+    }
+  ]
+}
+Viewpoint {
+  orientation 0.11758410173320111 -0.011981322309372853 -0.9929906479596448 3.095161469892983
+  position 21.59615911771733 1.0529031091437973 6.028177705530109
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+Floor {
+  size 10000 10000
+  appearance Parquetry {
+  }
+}
+Solid {
+  translation -4 0.4 0
+  children [
+    DEF WALL Shape {
+      appearance PBRAppearance {
+        baseColor 0 0.666667 1
+        roughness 0.5
+        metalness 0
+      }
+      geometry Box {
+        size 0.1 10 2
+      }
+    }
+  ]
+  name "wall1"
+}
+Solid {
+  translation 0.966047 -4.68994 0
+  rotation 0 0 1 -1.6010996938995747
+  children [
+    USE WALL
+  ]
+  name "wall2"
+}
+DEF dog1 Spot {
+  hidden linearVelocity_0 -0.0002740996434156503 -0.0021739646950106953 0.0002082763438649567
+  hidden angularVelocity_0 0.019475436953344537 -0.002603704141724654 0.00016405960935459796
+  translation 0.36052930058714666 -0.938878884361713 0.08505679516163332
+  rotation -0.007729450764176388 -0.01836729893765997 0.999801429245137 0.26896846628812465
+  controller "<none>"
+  controllerArgs [
+    ""
+  ]
+  supervisor TRUE
+}
+DEF human1 Pedestrian {
+  translation 4 5 1.27
+  rotation 0 0 1 -1.5707996938995747
+  controller "human_controller"
+  controllerArgs [
+    "--speed=2.0"
+    "--trajectory=4 5, 4 -4"
+  ]
+}
