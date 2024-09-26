@@ -6,15 +6,20 @@ from action_define import robot as mydog
 from cobot_emo_net import EMONET
 import numpy as np
 import math
+import multiprocessing
 import time
+from multiprocessing.connection import Listener, Connection, PipeConnection, Client
+
 from SPAIC import spaic
 import torch
-import multiprocessing
 import os
 import collections
 import random
 import threading
 import sys
+from threading import Lock
+
+from multiprocessing import shared_memory
 
 USER_CMD = ["sit_down", "lie_down", "go_head", "go_back", "give_paw", "stand_up", "null"]
 
@@ -27,17 +32,22 @@ state_nums = 10
 class Env:
     # 类似rl中的环境类，调用get_input可以获取到环境信息
     # 目前是 10 * 6 = 相位位置*2、速度*2、指令*1、振动输入*1
-    def __init__(self, dim, human:Node, dog:Node, rela=True) -> None:
+    def __init__(self, dim, human:Node, dog:Node,flag:Node=None,rela=True) -> None:
         self.rela = rela
         self.human = human
         self.dog = dog
+        self.flag=flag
+        self.flag_cmd_data = self.flag.getField('name') # name用来做指令的flag
         self.dim = dim # 这里的dim 指的是 过去多少个时间片的数据
 
         self.user_cmd = None # 检测到用户输入命令 0-len(USER_CMD_DICT)
+        self.user_cmd_lock = Lock() # 用于 场景中 人的动作执行时会直接修改 dog 的  cmd参数， 因此可能会去检测线程冲突，所以加锁
+        # 不同文件之间通信可能要使用 网络 或者文件来做
         self.gyro_err = 0 # 检测到 陀螺仪异常 0 1
 
         self.user_cmd_thread = threading.Thread(target=self._get_user_cmd, name="_get_user_cmd") # 线程中不断修改用户当下的指令，只保存最近的这个指令
         self.gyro_err_thread = threading.Thread(target=self._get_gyro, name="_get_gyro") # gyro 检测异常振动，这里是在模拟，被踢的时候
+        self.listen_thread = threading.Thread(target=self._listen_cmd, name='_listen_cmd') # 进程间通信
         self.xy_pos_limit = 20 # 归一化常数
         self.xy_speed_limit = 4 # 根据实际修改 # 这个速度可能要加快一点，现在的人的移动速度有点太慢了
         self.cmd_limit = len(USER_CMD_DICT)-1 # 指令归一化
@@ -54,12 +64,30 @@ class Env:
         self.dog_gyro = deque([[0] for _ in range(dim)], maxlen=dim) # 指令序列初始化
 
         self._all_thread_start()
+        
+    def _listen_cmd(self):
+        """ temp_time = time.strftime('%d-%H-%M',time.localtime(time.time()))
+        shm_a = shared_memory.SharedMemory(name = 'cmdcmd' + temp_time, create=True, size=10) # 创建一个共享内存 """
+
+        while True: # 创建共享内存
+            """ data = bytes(shm_a.buf[:7]).decode('utf8')
+            if data == 'standup':
+                print('receive standup cmd')
+                self.set_cmd_with_lock(USER_CMD_DICT["stand_up"])
+                shm_a.buf[:7] = b'0000000' # 清空 """
+            # print(self.flag.getField('name'))
+            if self.flag.getField('name').getSFString() == 'standup':
+                self.set_cmd_with_lock(USER_CMD_DICT["stand_up"])
+                print('receive standup cmd')
+                self.flag.getField('name').setSFString('null')
+            time.sleep(0.1)
 
 
         
     def _all_thread_start(self):
         self.user_cmd_thread.start()
         self.gyro_err_thread.start()
+        self.listen_thread.start()
 
 
     def get_input(self):
@@ -74,6 +102,10 @@ class Env:
 
         return np.concatenate((self.human_position, self.human_speed, self.human_cmd, self.dog_gyro), axis=1) # 暂时的数据维度是10 * 6 但是没有进行归一化
     
+    def set_cmd_with_lock(self, cmd):
+        # lock没有使用
+        with self.user_cmd_lock:
+            self.user_cmd = cmd
 
     def _get_user_cmd(self):
         # 每个除 null 之外的指令，被检测到后都会延迟一段时间再进行下一次检测
@@ -81,18 +113,21 @@ class Env:
             key = keys.getKey()
 
             if key == ord('A'):
-                self.user_cmd = USER_CMD_DICT["sit_down"]
+                self.set_cmd_with_lock(USER_CMD_DICT["sit_down"])
                 time.sleep(0.5)  #  这里的sleep 时间可以设置的和 time_step 有些关系
             elif key == ord('B'):
-                self.user_cmd = USER_CMD_DICT["give_paw"]
+                self.set_cmd_with_lock(USER_CMD_DICT["give_paw"])
                 time.sleep(0.5)
             else:
-                self.user_cmd = USER_CMD_DICT["null"]
+                self.set_cmd_with_lock(USER_CMD_DICT["null"])
         
     def _get_gyro(self):
+        time.sleep(2) # 最开始不检查
         while True:
-            _gyro_values =gyro.getValues()            
-            if(max(_gyro_values)) > 1.5:
+            _gyro_values =gyro.getValues()     
+            # print(_gyro_values)       
+            if(max(_gyro_values)) > 0.7:
+                print("receive a kick!")
                 self.gyro_err = 1
                 time.sleep(0.5)
                 self.gyro_err = 0
@@ -114,7 +149,7 @@ class Cobot:
         # 生成二阶动作
         # --- 等待交互结束 ---
         # 交互结果更rstdp新情感模型
-        print(state, state.shape)
+        # print(state, state.shape)
         if self.user_cmd == USER_CMD_DICT["null"]:
             # 没有指令的时候 趴下
             sit_down(1.0) #

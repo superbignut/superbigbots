@@ -218,16 +218,8 @@ class Pedestrian (Supervisor):
             self.root_rotation_field.setSFRotation(rotation)
 
 myhuman = Pedestrian()
-""" while True:
-    try:
-        existing_shm = shared_memory.SharedMemory(name='cmdcmd'+ time.strftime('%d-%H-%M',time.localtime(time.time())))
-        break
-    except (FileExistsError ,FileNotFoundError):
-        time.sleep(1)
-        continue
-     """
 
-human1 = myhuman.getFromDef('human1')
+human1 = myhuman.getFromDef('human2')
 dog1 = myhuman.getFromDef('dog1')
 flag = myhuman.getFromDef('flag')
 
@@ -237,7 +229,7 @@ human1_trans = human1.getField('translation')
 human1_rota = human1.getField('rotation')
 human1_color = human1.getField('shirtColor')
 flag_trans = flag.getField('translation')
-flag_name = flag.getField('name')
+
 
 dx, dy, dz = dog1.getPosition() # 初始位置，
 hx, hy, hz = human1.getPosition()
@@ -386,26 +378,12 @@ def hands_up():
             stand_up()
             break
 
-def send_standup_cmd():
-    global  flag_name
-    # existing_shm.buf[:7] = b'standup'
-    flag_name.setSFString('standup')
+
 def go_and_kick():
         go_to_dog()
         stand_up()
         wait_seconds(10)
         kick()
-        wait_seconds(10)
-        go_away_dog()
-        stand_up()
-        wait_seconds(10)
-
-def go_and_arms_up():
-        go_to_dog()
-        stand_up()
-        wait_seconds(10)
-        hands_up()
-        send_standup_cmd() # 进程通信
         wait_seconds(10)
         go_away_dog()
         stand_up()
@@ -418,18 +396,13 @@ def go_and_arms_up():
 if __name__ == '__main__':
 
     while True:
-        if flag.getPosition()[0] < 50:
-            # print(flag.getField('name').getSFString())
-            # flag_name.setSFString("123")
-            # print("human1 pos ", flag.getPosition()[0])
-            go_and_arms_up()
-            flag_trans.setSFVec3f([100,0,0])
-            
+        if flag.getPosition()[0] > 50:
+            # print("human2 pos ", flag.getPosition()[0])
+            go_and_kick()
+            flag_trans.setSFVec3f([0,0,0])
             myhuman.step(myhuman.time_step)
         else:
             myhuman.step(myhuman.time_step)
 
         
     
-        
-        

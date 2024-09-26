@@ -1,15 +1,35 @@
-import optparse
+
 import math
+import multiprocessing
+import time
+from multiprocessing.connection import Listener, Connection, PipeConnection
 
+def do_socket(conn:Connection|PipeConnection, addr):
+    try:
+        while True:
+            if conn.poll(timeout=1) == False: # 连接是否有数据
+                time.sleep(0.5)
+                continue
+            data = conn.recv()
+            conn.send("111")
+            print(data)
+    except Exception as e:
+        print(e)
+    finally:
+        conn.close()
+        
 
+def run_server(host, port):
+    server_sock = Listener((host, port))
+    pool = multiprocessing.Pool(10)
+    while True:
+        conn = server_sock.accept()
+        addr = server_sock.last_accepted
+        print(addr)
 
-def func():
-    opt_parser = optparse.OptionParser()
-    opt_parser.add_option("--trajectory", default="", help="Specify the trajectory in the format [x1 y1, x2 y2, ...]")
-    opt_parser.add_option("--speed", type=float, default=0.5, help="Specify walking speed in [m/s]")
-    opt_parser.add_option("--step", type=int, help="Specify time step (otherwise world time step is used)")
-    options, args = opt_parser.parse_args() #W
-    print(options.speed)
-    
+        pool.apply_async(func=do_socket, args=(conn, addr,))  # 每当有一个连接过来调用， 不等待结果
+
 if __name__ == '__main__':
-    func()
+    server_host = '127.0.0.1'
+    server_port = 8000
+    run_server(server_host, server_host)

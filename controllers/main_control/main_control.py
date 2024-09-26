@@ -23,9 +23,11 @@ human1 = mydog.getFromDef("human1") # 获取全局对象，进而方便获得位
 
 dog1 = mydog.getFromDef("dog1") # 获取全局对象
 
+flag1 = mydog.getFromDef('flag')
+
 mybot = Cobot(webots_robot=mydog) # 二阶段下发robot
 
-myenv = Env(dim=10, human=human1, dog=dog1) # 初始化相对速度和位置, 这个作为环境输入，这里也会启动状态检测线程，dim=多少个时间的数据
+myenv = Env(dim=10, human=human1, dog=dog1, flag=flag1) # 初始化相对速度和位置, 这个作为环境输入，这里也会启动状态检测线程，dim=多少个时间的数据
 
 while mydog.step(timestep) != -1:
     try:

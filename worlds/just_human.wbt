@@ -17,8 +17,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation 0.11758410173320111 -0.011981322309372853 -0.9929906479596448 3.095161469892983
-  position 21.59615911771733 1.0529031091437973 6.028177705530109
+  orientation 0.1429574466584836 -0.005704582498702769 -0.9897123956904865 3.0153983503570165
+  position 25.10997553448596 3.142888650942648 5.8324134119008875
 }
 TexturedBackground {
 }
@@ -30,23 +30,23 @@ Floor {
   }
 }
 Solid {
-  translation -4 0.4 0
+  translation -11.95 5.32 0
   children [
     DEF WALL Shape {
       appearance PBRAppearance {
-        baseColor 0 0.666667 1
+        baseColor 0.701961 0.466667 0
         roughness 0.5
         metalness 0
       }
       geometry Box {
-        size 0.1 10 2
+        size 0.1 27 4
       }
     }
   ]
   name "wall1"
 }
-Solid {
-  translation 0.966047 -4.68994 0
+DEF wall Solid {
+  translation 1.49054 -8.53731 0
   rotation 0 0 1 -1.6010996938995747
   children [
     USE WALL
@@ -54,22 +54,34 @@ Solid {
   name "wall2"
 }
 DEF dog1 Spot {
-  hidden linearVelocity_0 -0.0002740996434156503 -0.0021739646950106953 0.0002082763438649567
-  hidden angularVelocity_0 0.019475436953344537 -0.002603704141724654 0.00016405960935459796
-  translation 0.36052930058714666 -0.938878884361713 0.08505679516163332
+  translation 2.83546 -2.58023 0.100113
   rotation -0.007729450764176388 -0.01836729893765997 0.999801429245137 0.26896846628812465
-  controller "<none>"
+  controller "main_control"
   controllerArgs [
     ""
   ]
   supervisor TRUE
 }
 DEF human1 Pedestrian {
-  translation 4 5 1.27
+  translation 1.6 5 1.27
   rotation 0 0 1 -1.5707996938995747
   controller "human_controller"
   controllerArgs [
     "--speed=2.0"
     "--trajectory=4 5, 4 -4"
   ]
+  shirtColor 0 1 0
+}
+DEF human2 Pedestrian {
+  translation 10.15 5 1.37
+  rotation 0 0 1 -1.5707996938995747
+  name "pedestrian(1)"
+  controller "human2"
+  controllerArgs [
+    "--speed=2.0"
+    "--trajectory=4 5, 4 -4"
+  ]
+  shirtColor 1 0 0
+}
+DEF flag Solid {
 }
