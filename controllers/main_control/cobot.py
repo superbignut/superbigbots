@@ -126,7 +126,7 @@ class Env:
         while True:
             _gyro_values =gyro.getValues()     
             # print(_gyro_values)       
-            if(max(_gyro_values)) > 0.7:
+            if(max(_gyro_values)) > 0.2:
                 print("receive a kick!")
                 self.gyro_err = 1
                 time.sleep(0.5)

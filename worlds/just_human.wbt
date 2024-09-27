@@ -54,7 +54,7 @@ DEF wall Solid {
   name "wall2"
 }
 DEF dog1 Spot {
-  translation 2.83546 -2.58023 0.100113
+  translation 4.21672 -0.892593 0.104888
   rotation -0.007729450764176388 -0.01836729893765997 0.999801429245137 0.26896846628812465
   controller "main_control"
   controllerArgs [
@@ -73,7 +73,7 @@ DEF human1 Pedestrian {
   shirtColor 0 1 0
 }
 DEF human2 Pedestrian {
-  translation 10.15 5 1.37
+  translation 10.15 5 1.27
   rotation 0 0 1 -1.5707996938995747
   name "pedestrian(1)"
   controller "human2"

@@ -1,5 +1,5 @@
 """
-    这个文件是人的控制器, 需要定义一些动作来完成对 虚拟环境下 预训练数据的构造
+    这个文件是踢狗人的控制器, 需要定义一些动作来完成对 虚拟环境下 预训练数据的构造
 
     大臂举平 是 -1.6到1.6
 
@@ -231,8 +231,8 @@ human1_color = human1.getField('shirtColor')
 flag_trans = flag.getField('translation')
 
 
-dx, dy, dz = dog1.getPosition() # 初始位置，
-hx, hy, hz = human1.getPosition()
+init_dx, init_dy, init_dz = dog1.getPosition() # 初始位置，
+init_hx, init_hy, init_hz = human1.getPosition()
 
 for i in range(0, myhuman.BODY_PARTS_NUMBER):
     myhuman.joints_position_field.append(human1.getField(myhuman.joint_names[i])) # 把所有关节的对象存起来
@@ -349,7 +349,7 @@ def wait_seconds(n):
     while myhuman.step(myhuman.time_step) != -1 and i<=n:
         i+=1
         time.sleep(0.1)
-def kick():
+def kick(dx, dy, hx, hy, force=1):
 
     time0 = myhuman.getTime()
     while myhuman.step(myhuman.time_step) != -1:
@@ -361,7 +361,7 @@ def kick():
             current_angle = myhuman.kick_angles[i][current_sequence] * (1 - ratio) + myhuman.kick_angles[i][(current_sequence + 1) % myhuman.kick_sequence_number] * ratio # 让动作可以连续过度到下一个
             myhuman.joints_position_field[i].setSFFloat(current_angle) # 1维的数据
         if current_sequence == myhuman.kick_sequence_number -1:
-            dog1.addForce([(dx-hx)*100, (dy-hy)*100, 0], True)
+            dog1.addForce([(dx-hx)*100 * force, (dy-hy)*100*force, 0], True)
             stand_up()
             break
 def hands_up():
@@ -378,12 +378,33 @@ def hands_up():
             stand_up()
             break
 
+def stand_behind_dog():
+    dx, dy, dz = dog1.getPosition() # 初始位置
+    ls = dog1.getOrientation() # 0 3 分别代表狗这时候的朝向的xy 向量
+    t_x = ls[0]
+    t_y = ls[3] # 可以对这个向量进行0-PI/3的旋转
+    rand_theta = random.uniform(-math.pi/3,math.pi/3) # 也就是出现在 狗的 后面 扇形-pi/3 ,pi/3的区间里
+    costheta = math.cos(rand_theta)
+    sintheta = math.sin(rand_theta)
+    t_x_new = costheta * t_x - sintheta * t_y # 旋转后的向量
+    t_y_new = sintheta * t_x + costheta * t_y
+    hx, hy, hz = human1.getPosition()
 
-def go_and_kick():
+    new_hx = dx - t_x_new*10
+    new_hy = dy - t_y_new*10
+
+    human1_trans.setSFVec3f([new_hx, new_hy, hz])   
+    myhuman.step(myhuman.time_step)
+
+def go_back_and_kick():
+        # 走到后面去给狗狠狠来一下
+        stand_behind_dog()
+        dx, dy, dz = dog1.getPosition() # 初始位置，决定了力的方向
+        hx, hy, hz = human1.getPosition()
         go_to_dog()
         stand_up()
         wait_seconds(10)
-        kick()
+        kick(dx, dy, hx, hy,1.5)
         wait_seconds(10)
         go_away_dog()
         stand_up()
@@ -397,8 +418,10 @@ if __name__ == '__main__':
 
     while True:
         if flag.getPosition()[0] > 50:
-            # print("human2 pos ", flag.getPosition()[0])
-            go_and_kick()
+            """ co = myhuman.getSelf().getField('shirtColor')
+            co.setSFVec3f([0,1,1]) """  # 设置颜色总会让控制器重新跑一次，不知道为什么
+            # print("dog oritation", dog1.getOrientation())
+            go_back_and_kick()
             flag_trans.setSFVec3f([0,0,0])
             myhuman.step(myhuman.time_step)
         else:

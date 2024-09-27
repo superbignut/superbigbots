@@ -239,8 +239,8 @@ human1_color = human1.getField('shirtColor')
 flag_trans = flag.getField('translation')
 flag_name = flag.getField('name')
 
-dx, dy, dz = dog1.getPosition() # 初始位置，
-hx, hy, hz = human1.getPosition()
+init_dx, init_dy, init_dz = dog1.getPosition() # 初始位置，
+init_hx, init_hy, init_hz = human1.getPosition()
 
 for i in range(0, myhuman.BODY_PARTS_NUMBER):
     myhuman.joints_position_field.append(human1.getField(myhuman.joint_names[i])) # 把所有关节的对象存起来
@@ -358,7 +358,8 @@ def wait_seconds(n):
         i+=1
         time.sleep(0.1)
 def kick():
-
+    dx, dy, dz = dog1.getPosition() # 初始位置，
+    hx, hy, hz = human1.getPosition()
     time0 = myhuman.getTime()
     while myhuman.step(myhuman.time_step) != -1:
         temp_time = myhuman.getTime() - time0
@@ -385,7 +386,24 @@ def hands_up():
         if current_sequence == myhuman.left_arms_number -1:
             stand_up()
             break
+def stand_before_dog():
+    dx, dy, dz = dog1.getPosition() # 初始位置
+    ls = dog1.getOrientation() # 0 3 分别代表狗这时候的朝向的xy 向量
+    t_x = ls[0]
+    t_y = ls[3] # 可以对这个向量进行0-PI/3的旋转
+    rand_theta = random.uniform(math.pi/6,math.pi/4) # 也就是出现在 狗的 后面 扇形-pi/3 ,pi/3的区间里
+    rand_theta = rand_theta if random.random() < 0.5 else -rand_theta
+    costheta = math.cos(rand_theta)
+    sintheta = math.sin(rand_theta)
+    t_x_new = costheta * t_x - sintheta * t_y # 旋转后的向量
+    t_y_new = sintheta * t_x + costheta * t_y
+    hx, hy, hz = human1.getPosition()
 
+    new_hx = dx + t_x_new*6
+    new_hy = dy + t_y_new*6
+
+    human1_trans.setSFVec3f([new_hx, new_hy, hz])   
+    myhuman.step(myhuman.time_step) # 更新
 def send_standup_cmd():
     global  flag_name
     # existing_shm.buf[:7] = b'standup'
@@ -401,6 +419,7 @@ def go_and_kick():
         wait_seconds(10)
 
 def go_and_arms_up():
+        stand_before_dog()
         go_to_dog()
         stand_up()
         wait_seconds(10)
