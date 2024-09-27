@@ -36,7 +36,7 @@ for file in os.listdir(log_path):
 
 device = torch.device("cuda")
 
-node_num = 60
+node_num = 4
 label_num = 100 
 bat_size = 1 # 最外层遍历，无实际效果
 
@@ -102,38 +102,26 @@ class EMONET(spaic.Network):
         # 根据交互结果进行更新reward
         pass
 
-    def pre_train(self):
+    def pre_train(self, data=None, label=None):
         # 这里需要对网路进行预训练
+        output = self.step(data)
+        self.buffer[label].append(output)
+        print(label, " buffer len is ",len(self.buffer[label]))
+        return output
 
-        pass
+    def pre_train_over_save(self):
+        self.save_state(filename= 'save/cobot') # 这里需要手动删除保存的文件夹
+        torch.save(self.buffer,'cobot_buffer.pth') # buffer 也需要保存起来
 
-def fake_data_create():
-    # 这里的数据，不像minist 那样有完好的数据集，这里需要手动构造一下，并且 可能还需要对向脉冲编码的转换进行一些调整
-    # 此外的话，对构造数据的验证，看看能不能在预训练的时候看到预测效果，行的话就达到了预训练的目的
-    # 这里就用rand 来构造输入数据吧，即使做了归一化，还是避免不了输入的不规则性，看看影响大不大，打的话得想办法抵消影响
-    # shape = 10, 6 的np.array
-    # rand 构造数据 和真实肯定出入很大, 因此还是从虚拟环境中获取更为可靠
-    """
-        0  x 的相对位置 # 这里可以搞一个约束区间 超过的就当边界算
-        1  y 的相对位置
-        2  x 的相对速度
-        3  y 的相对速度
-        4  指令输入 0-6
-        5  加速度传感器输入， 检测异常0、1
-    """
-    # 构造数据1， 如果后面5个区间的总距离和 比前面5个的总距离和要小，那么就 label 是积极的，否则是消极的
-    # 构造数据2， 如果速度很大认为是消极
-    # 构造数据3， 如果速度减小认为是积极，否则是消极
-    # 构造数据4， 过去10个区间里有imu 振荡，认为是消极
-    # 构造数据5， 过去10个区间里有指令交互，认为是积极
 
-    # 数据和label 分别存储 但是编号是对应的
-    def fake_data_1():
-        # 构造1
-        temp_data = np.random.rand(data_time_len, data_kind_len) # 10 * 6
 
-    pass
 if __name__ == '__main__':
+    
+    net = EMONET()
 
-    if hasattr(None, '__call__'):
-        print("yes")
+    for i in tqdm(range(1000)):
+
+        data = np.random.random([1,4])
+
+        print(net.step(data))
+
