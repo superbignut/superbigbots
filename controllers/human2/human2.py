@@ -225,6 +225,8 @@ flag = myhuman.getFromDef('flag')
 
 dog1_trans = dog1.getField('translation')
 dog1_rota = dog1.getField('rotation')
+dig1_data = dog1.getField('customData')
+
 human1_trans = human1.getField('translation')
 human1_rota = human1.getField('rotation')
 human1_color = human1.getField('shirtColor')
@@ -298,8 +300,8 @@ def go_away_dog():
     dx, dy, dz = dog1.getPosition() # 初始位置，
     hx, hy, hz = human1.getPosition()
     time0 = myhuman.getTime()
-    new_hx = (hx-dx)*1 +hx
-    new_hy = (hy-dy)*1 +hy
+    new_hx = (hx-dx)*3 +hx
+    new_hy = (hy-dy)*3 +hy
 
     destination_dis = math.sqrt((dx-new_hx)**2 + (dy-new_hy)**2) # 计算终点
     while myhuman.step(myhuman.time_step) != -1:
@@ -311,7 +313,7 @@ def go_away_dog():
 
             time = myhuman.getTime() # 每个time_step是0.032 
 
-            if math.sqrt((temp_hx-temp_dx)**2 + (temp_hy-temp_dy)**2) <5:
+            if math.sqrt((temp_hx-temp_dx)**2 + (temp_hy-temp_dy)**2) <10:
                 # 当距离远的时候， 要走过去
                 # 生成0-7的序列
                 current_sequence = int(((time * myhuman.speed) / myhuman.CYCLE_TO_DISTANCE_RATIO) % myhuman.WALK_SEQUENCES_NUMBER) # 不管怎么缩放,应该都是 0-WALK_SEQUENCES_NUMBER-1,, 如果放大系数很大 则序列停留短,否则停留长
@@ -398,17 +400,22 @@ def stand_behind_dog():
 
 def go_back_and_kick():
         # 走到后面去给狗狠狠来一下
+        if dig1_data.getSFString() == 'test':
+            wait_time = 20
+        else:
+            wait_time = 10
         stand_behind_dog()
         dx, dy, dz = dog1.getPosition() # 初始位置，决定了力的方向
         hx, hy, hz = human1.getPosition()
         go_to_dog()
         stand_up()
-        wait_seconds(10)
-        kick(dx, dy, hx, hy,1.5)
-        wait_seconds(10)
+        wait_seconds(wait_time)
+        if dig1_data.getSFString() != 'test' or dig1_data.getSFString() == 'micc': # 测试的时候不踢, micc的时候还是要踢
+            kick(dx, dy, hx, hy,1.5)
+        wait_seconds(wait_time)
         go_away_dog()
         stand_up()
-        wait_seconds(10)
+        wait_seconds(wait_time)
 
 
 # temp_time = time.strftime('%d-%H-%M',time.localtime(time.time()))

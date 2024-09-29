@@ -36,7 +36,7 @@ for file in os.listdir(log_path):
 
 device = torch.device("cuda")
 
-node_num = 4
+node_num = 12
 label_num = 100 
 bat_size = 1 # 最外层遍历，无实际效果
 
@@ -49,23 +49,32 @@ time_step = int(run_time / backend.dt) # 总共有多少个阻塞突触的时间
 data_time_len = 10
 data_kind_len = 6
 
+model_path = 'save/cobot'
+
+buffer_path = 'cobot_buffer.pth'
+
+
+mic_model_path = 'save/mic_cobot'
+
+mic_buffer_path = 'mic_cobot_buffer.pth'
 class EMONET(spaic.Network):
     def __init__(self):
         super().__init__()
 
-        self.input = spaic.Encoder(num=node_num, time=run_time, coding_method='poisson', unit_conversion=0.6375) # 这里需要修改
+        self.input = spaic.Encoder(num=node_num, time=run_time, coding_method='poisson', unit_conversion=0.6) # 这里需要修改
 
         self.layer1 = spaic.NeuronGroup(label_num, model='lifstdp_ex') # stdp_ex 比 stdp_ih 多了一层阈值的衰减 \tao_\theta, 论文中有提到这个自适应的阈值
         
         self.layer2 = spaic.NeuronGroup(label_num, model='lifstdp_ih') # 维度都是100， 
 
-        self.output = spaic.Decoder(num=label_num, dec_target=self.layer1, time=run_time, coding_method='spike_counts') # layer1作为了输出层, 兴奋次数作为输出
+        self.output  = spaic.Decoder(num=label_num, dec_target=self.layer1, time=run_time, coding_method='spike_counts') # layer1作为了输出层, 兴奋次数作为输出
 
-        self.connection1 = spaic.Connection(self.input, self.layer1, link_type='full', weight=(np.random.rand(label_num, node_num) * 0.3)) # 100 * 784
+        self.connection1 = spaic.Connection(self.input, self.layer1, link_type='full', weight=(np.random.rand(label_num, node_num) * 0.3)) # 100 * 4
         
         self.connection2 = spaic.Connection(self.layer1, self.layer2, link_type='full', weight=np.diag(np.ones(label_num)) * 22.5   )
         
-        self.connection3 = spaic.Connection(self.layer2, self.layer1, link_type='full', weight=( np.ones((label_num, label_num)) - np.diag(np.ones(label_num)) ) * (-120)) # 起到一个抑制的作用，除了1-1的前一个，侧向抑制，并起到竞争的效果
+        self.connection3 = spaic.Connection(self.layer2, self.layer1, link_type='full', weight=( np.ones((label_num, label_num)) - np.diag(np.ones(label_num)) ) * (-120)) 
+        # 起到一个抑制的作用，除了1-1的前一个，侧向抑制，并起到竞争的效果
 
         self._learner = Learner(algorithm='nearest_online_stdp', trainable=self.connection1, run_time=run_time) # 这里也只是训练 从输入到第一层的连接，其余层不变
 
@@ -106,14 +115,31 @@ class EMONET(spaic.Network):
         # 这里需要对网路进行预训练
         output = self.step(data)
         self.buffer[label].append(output)
-        print(label, " buffer len is ",len(self.buffer[label]))
+        # print(label, " buffer len is ",len(self.buffer[label]))
         return output
+    """     def micc_train(self,data=None, label=None):
+        output = self.step(data)
+        self.assign_label_update(newoutput=output, newlabel=label) # 把新数据加进去，然后更新 """
+
+
 
     def pre_train_over_save(self):
-        self.save_state(filename= 'save/cobot') # 这里需要手动删除保存的文件夹
-        torch.save(self.buffer,'cobot_buffer.pth') # buffer 也需要保存起来
+        self.save_state(filename = model_path) # 这里需要手动删除保存的文件夹
+        torch.save(self.buffer, buffer_path) # buffer 也需要保存起来
 
+    def mic_change_over_save(self):
+        self.save_state(filename = mic_model_path) # 这里需要手动删除保存的文件夹
+        torch.save(self.buffer, mic_buffer_path) # buffer 也需要保存起来
 
+    def assign_label_update(self, newoutput=None, newlabel=None, weight=0):
+        # 如果没有新的数据输入，则就是对 assign_label 进行一次计算，否则 会根据权重插入新数据，进而计算
+        if newoutput != None:
+            self.buffer[newlabel].append(newoutput)
+        avg_buffer = [sum(self.buffer[i]) / len(self.buffer[i]) for i in range(len(self.buffer))] # sum_buffer 是一个求和之后 取平均的tensor  n * 1 * 100
+        # avg_buffer = [sum_buffer[i] / len(agent.buffer[i]) for i in range(len(agent.buffer))]
+        assign_label = torch.argmax(torch.cat(avg_buffer, 0), 0) # n 个1*100 的list在第0个维度合并 -> n*100的tensor, 进而在第0个维度比哪个更大, 返回一个1维的tensor， 内容是index，0-n， 目前是0和1
+        # 这里的 100 个 0 和1 也就代表了， 当前那个神经元 可以代表的 类别是什么
+        self.assign_label = assign_label # 初始化结束
 
 if __name__ == '__main__':
     

@@ -1,0 +1,23 @@
+{
+    "python.defaultInterpreterPath": "c:\\Users\\admin\\AppData\\Local\\Programs\\Python\\Python310\\python.exe",
+    "python.autoComplete.extraPaths": [
+
+    "C:\\Program Files\\Webots\\lib\\controller\\python",
+    ],
+    "python.analysis.extraPaths": [
+        "C:\\Program Files\\Webots\\lib\\controller\\python"
+    ],
+    "code-runner.runInTerminal": true,
+    "editor.largeFileOptimizations": false,
+    "cmake.configureOnOpen": true,
+    "editor.unicodeHighlight.includeComments": false,
+    "files.autoSave": "onFocusChange",
+    "window.zoomLevel": 1,
+    "git.openRepositoryInParentFolders": "never",
+    "emacs-mcx.paredit.parentheses": {
+        
+        "[": "]",
+        "(": ")",
+        "{": "}"
+    }
+}

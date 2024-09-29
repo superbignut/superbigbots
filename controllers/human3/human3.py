@@ -359,9 +359,8 @@ def wait_seconds(n):
     while myhuman.step(myhuman.time_step) != -1 and i<=n:
         i+=1
         time.sleep(0.1)
-def kick():
-    dx, dy, dz = dog1.getPosition() # 初始位置，
-    hx, hy, hz = human1.getPosition()
+def kick(dx, dy, hx, hy, force=1):
+
     time0 = myhuman.getTime()
     while myhuman.step(myhuman.time_step) != -1:
         temp_time = myhuman.getTime() - time0
@@ -372,20 +371,7 @@ def kick():
             current_angle = myhuman.kick_angles[i][current_sequence] * (1 - ratio) + myhuman.kick_angles[i][(current_sequence + 1) % myhuman.kick_sequence_number] * ratio # 让动作可以连续过度到下一个
             myhuman.joints_position_field[i].setSFFloat(current_angle) # 1维的数据
         if current_sequence == myhuman.kick_sequence_number -1:
-            dog1.addForce([(dx-hx)*100, (dy-hy)*100, 0], True)
-            stand_up()
-            break
-def hands_up():
-    time0 = myhuman.getTime()
-    while myhuman.step(myhuman.time_step) != -1:
-        temp_time = myhuman.getTime() - time0
-        current_sequence = int(((temp_time * myhuman.speed) / myhuman.CYCLE_TO_DISTANCE_RATIO) % myhuman.left_arms_number)
-
-        ratio = (temp_time * myhuman.speed) / myhuman.CYCLE_TO_DISTANCE_RATIO - int(((temp_time * myhuman.speed) / myhuman.CYCLE_TO_DISTANCE_RATIO))
-        for i in range(0, myhuman.BODY_PARTS_NUMBER): # 遍历所有关节，关节移动
-            current_angle = myhuman.left_arms[i][current_sequence] * (1 - ratio) + myhuman.left_arms[i][(current_sequence + 1) % myhuman.left_arms_number] * ratio # 让动作可以连续过度到下一个
-            myhuman.joints_position_field[i].setSFFloat(current_angle) # 1维的数据
-        if current_sequence == myhuman.left_arms_number -1:
+            dog1.addForce([(dx-hx)*100 * force, (dy-hy)*100*force, 0], True)
             stand_up()
             break
 def stand_before_dog():
@@ -413,7 +399,6 @@ def stand_left_dog():
     t_x = ls[0]
     t_y = ls[3] # 可以对这个向量进行PI/2的旋转
     rand_theta = math.pi / 2
-    rand_theta = rand_theta if random.random() < 0.5 else -rand_theta
     costheta = math.cos(rand_theta)
     sintheta = math.sin(rand_theta)
     t_x_new = costheta * t_x - sintheta * t_y # 旋转后的向量
@@ -426,26 +411,42 @@ def stand_left_dog():
     human1_trans.setSFVec3f([new_hx, new_hy, hz])   
     myhuman.step(myhuman.time_step) # 更新
 
+def go_left_and_kick():
+        # 走到侧边面去给狗狠狠来一下
+        wait_time = 20
+        stand_left_dog()
+        dx, dy, dz = dog1.getPosition() # 初始位置，决定了力的方向
+        hx, hy, hz = human1.getPosition()
+        go_to_dog()
+        stand_up()
+        wait_seconds(wait_time)
+        kick(dx, dy, hx, hy,0.6) # 或者这里可以是随机踢
+        wait_seconds(wait_time)
+        go_away_dog()
+        stand_up()
+        wait_seconds(wait_time)
+def hands_up():
+    time0 = myhuman.getTime()
+    while myhuman.step(myhuman.time_step) != -1:
+        temp_time = myhuman.getTime() - time0
+        current_sequence = int(((temp_time * myhuman.speed) / myhuman.CYCLE_TO_DISTANCE_RATIO) % myhuman.left_arms_number)
+
+        ratio = (temp_time * myhuman.speed) / myhuman.CYCLE_TO_DISTANCE_RATIO - int(((temp_time * myhuman.speed) / myhuman.CYCLE_TO_DISTANCE_RATIO))
+        for i in range(0, myhuman.BODY_PARTS_NUMBER): # 遍历所有关节，关节移动
+            current_angle = myhuman.left_arms[i][current_sequence] * (1 - ratio) + myhuman.left_arms[i][(current_sequence + 1) % myhuman.left_arms_number] * ratio # 让动作可以连续过度到下一个
+            myhuman.joints_position_field[i].setSFFloat(current_angle) # 1维的数据
+        if current_sequence == myhuman.left_arms_number -1:
+            stand_up()
+            break
 def send_standup_cmd():
     global  flag_name
     # existing_shm.buf[:7] = b'standup'
     flag_name.setSFString('standup')
-def go_and_kick():
-        go_to_dog()
-        stand_up()
-        wait_seconds(10)
-        kick()
-        wait_seconds(10)
-        go_away_dog()
-        stand_up()
-        wait_seconds(10)
-
 def go_and_arms_up():
-        if dig1_data.getSFString() == 'test':
-            wait_time = 20
-        else:
-            wait_time = 10
-        stand_before_dog()
+
+        wait_time = 10
+
+        stand_left_dog()
         go_to_dog()
         stand_up()
         wait_seconds(wait_time)
@@ -456,8 +457,6 @@ def go_and_arms_up():
         go_away_dog()
         stand_up()
         wait_seconds(wait_time)
-
-
 # temp_time = time.strftime('%d-%H-%M',time.localtime(time.time()))
 
 
@@ -476,6 +475,6 @@ if __name__ == '__main__':
             myhuman.step(myhuman.time_step)
 
         
-    
+
         
         

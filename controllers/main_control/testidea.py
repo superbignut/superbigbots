@@ -132,7 +132,7 @@ def TestNet_Init(flag='train'):
             for i, item in enumerate(train_loader):
                 data, label = item
                 output = agent.step(data)
-
+                print(output)
                 agent.buffer[label[0]].append(output) # label[0]的第一个维度是batch
                 im = agent.mon_weight.plot_weight(time_id=-1, linewidths=0, linecolor='white',
                             reshape=True, n_sqrt=int(np.sqrt(label_num)), side=28, im=im, wmax=1) #把权重 画出来 100 * 784 = 100 * 28 * 28
@@ -246,7 +246,7 @@ def ND_TestNet_Eval_And_Train(nd_eval_num = 80):
 
 def load_run():
     TestNet_Init('load') # 训练
-    TestNet_Eval(eval_num=0) # 预测
+    TestNet_Eval(eval_num=100) # 预测
     ND_TestNet_Eval_And_Train(nd_eval_num=2000) # 加入新数据微调
 
 def train_run():
