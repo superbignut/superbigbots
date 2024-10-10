@@ -231,7 +231,7 @@ human1_trans = human1.getField('translation')
 human1_rota = human1.getField('rotation')
 human1_color = human1.getField('shirtColor')
 flag_trans = flag.getField('translation')
-
+flag_description = flag.getField('description')
 
 init_dx, init_dy, init_dz = dog1.getPosition() # 初始位置，
 init_hx, init_hy, init_hz = human1.getPosition()
@@ -351,6 +351,10 @@ def wait_seconds(n):
     while myhuman.step(myhuman.time_step) != -1 and i<=n:
         i+=1
         time.sleep(0.1)
+
+def send_kick_input():
+    flag_description.setSFString('kick')
+
 def kick(dx, dy, hx, hy, force=1):
 
     time0 = myhuman.getTime()
@@ -364,6 +368,7 @@ def kick(dx, dy, hx, hy, force=1):
             myhuman.joints_position_field[i].setSFFloat(current_angle) # 1维的数据
         if current_sequence == myhuman.kick_sequence_number -1:
             dog1.addForce([(dx-hx)*100 * force, (dy-hy)*100*force, 0], True)
+            send_kick_input()
             stand_up()
             break
 def hands_up():

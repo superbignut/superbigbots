@@ -27,6 +27,7 @@ USER_CMD = ["sit_down", "lie_down", "go_head", "go_back", "give_paw", "stand_up"
 
 USER_CMD_DICT = {"sit_down":0, "lie_down":1, "go_head":2, "go_back":3, "give_paw":4, "stand_up":5, "null":6}
 
+EMO = {"positive":0, "negative":1}
 state_nums = 10
 
 # human1 = mydog.getFromDef("human1") # 得到human1的handler
@@ -52,7 +53,7 @@ class Env:
         self.gyro_err = 0 # 检测到 陀螺仪异常 0 1
 
         self.user_cmd_thread = threading.Thread(target=self._get_user_cmd, name="_get_user_cmd") # 线程中不断修改用户当下的指令，只保存最近的这个指令
-        self.gyro_err_thread = threading.Thread(target=self._get_gyro, name="_get_gyro") # gyro 检测异常振动，这里是在模拟，被踢的时候
+        self.gyro_err_thread = threading.Thread(target=self._get_gyro_new, name="_get_gyro") # gyro 检测异常振动，这里是在模拟，被踢的时候
         self.listen_thread = threading.Thread(target=self._listen_cmd, name='_listen_cmd') # 进程间通信
         self.xy_pos_limit = 20 # 归一化常数
         self.xy_speed_limit = 4 # 根据实际修改 # 这个速度可能要加快一点，现在的人的移动速度有点太慢了
@@ -74,7 +75,7 @@ class Env:
         self.human_speed = 0
         self.human_path_direction = np.array([0,0]) # 与dog的正前方 相对的角度 只考虑xy平面
 
-        
+        self.is_kick = False
 
 
         self._all_thread_start()
@@ -241,18 +242,27 @@ class Env:
                 self.set_cmd_with_lock(USER_CMD_DICT["null"])
         
     def _get_gyro(self):
+        # 为了更好的效果， 使用 _get_gyro_new 来代替 传统的gyro传感器作为机器狗的输入部分
         time.sleep(8) # 最开始不检查
         while True:
             _gyro_values =gyro.getValues()     
             # print(_gyro_values)       
-            if(max(_gyro_values)) > 0.2:
+            if(max(_gyro_values)) > 0.2: # 这里在训练的时候可以调小一点，但是在真实模拟的时候，防止和起立时的晃动区分
                 # print("receive a kick!")
                 self.gyro_err = 1
                 time.sleep(0.5)
                 self.gyro_err = 0
-
-
-
+    # 这里要不也和 指令一样 使用 数据输入吧， 不使用传感器探测了
+    def _get_gyro_new(self):
+        # 使用消息的方式来检测是否有kick输入
+        while True: # 
+            if self.flag.getField('description').getSFString() == 'kick':
+                self.gyro_err = 1
+                time.sleep(0.5)
+                # print('receive standup cmd')
+                self.gyro_err = 0
+                self.flag.getField('description').setSFString('null') # 这里的修改逻辑可能有问题
+            
 class Cobot:
     # 二阶段机器人
 
@@ -278,7 +288,10 @@ class Cobot:
         self.right_predict = 0
         self.right_predict_list = []
 
-        self.emo_queue = deque(maxlen=3) # 只保存最近的情感预测， 用于比较
+
+        self.emo_size = 3 
+        self.emo_queue = deque(maxlen=self.emo_size) # 只保存最近的情感预测， 用于比较
+        self.emo_queue_lock = Lock()
     def step(self, state=None):
         # 读取输入
         # 检测指令
@@ -335,7 +348,7 @@ class Cobot:
     def mic_change_and_train(self):
         # 这里加入的小紫， 要对模型进行微调
         if self.all_sit_down_flag:
-            self.sit_down_all_the_time() # 这里就不能一直坐着了，需要根据 情感来进行动作
+            self.do_emotional_action() # 这里就不能一直坐着了，需要根据 情感来进行动作
             self.all_sit_down_flag = False
         
         state = self.env.get_three_human_input() #  数据更细与获取， 这里的输入有负数，需要处理
@@ -380,15 +393,19 @@ class Cobot:
             for i in range(len(self.emo_model.assign_label)):
                 temp_cnt[self.emo_model.assign_label[i]] += output[0, i] # 第一个维度是batch, 
             predict_label = torch.argmax(torch.tensor(temp_cnt))
-            self.emo_queue.append(predict_label) # 将最近的预测结果放入队列
+            self.emo_queue_appened(predict_label) # 将最近的预测结果放入队列
             print("the predict_label is: ", self.check_emo_queue())
 
-
+    def emo_queue_appened(self, predict_label):
+        with self.emo_queue_lock:
+            self.emo_queue.append(predict_label) # 将最近的预测结果放入队列
+        
     def check_emo_queue(self):
-        if self.emo_queue.count(0) > self.emo_queue.count(1): # 看谁的数量多
-            return 0
-        else:
-            return 1
+        with self.emo_queue_lock:
+            if self.emo_queue.count(0) > self.emo_queue.count(1): # 看谁的数量多
+                return 0
+            else:
+                return 1
         
     def load_model_and_buffer(self):
         self.emo_model.state_from_dict(filename=model_path, device=torch.device("cuda"))
@@ -475,7 +492,20 @@ class Cobot:
 
     def do_emotional_action(self):
         # 根据不同的情感，做出不同的动作
-        pass
+        sit_down(4)
+        temp_thread = threading.Thread(target=self._do_emotional_action, name="_do_emotional_action")
+        temp_thread.start()
+    
+    
+    def _do_emotional_action(self):
+        # 这里要怎么设计，才能， 在仿真环境中，更好的可视化的展示出happy， sad 的情绪呢
+        while True:
+            temp_emo = self.check_emo_queue()
+            if temp_emo == EMO["positive"]:
+                give_paw_emo_change(2.0,self) # 这里把dog的对象也传进去，动作执行的循环中，判断是否情感发生变化，发生变化则退出当前动作
+            else:
+                lie_down_emo_change(2.0,self)
+
 
     def sit_down_all_the_time(self):
         temp_thread = threading.Thread(target=self._sit_down_thread,name="_sit_down_thread")
@@ -483,7 +513,7 @@ class Cobot:
 
 
     def _sit_down_thread(self):
-        while(True):
+        while True:
             sit_down(2.0)
 
     def wait_interact(self):

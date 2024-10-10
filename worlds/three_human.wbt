@@ -96,4 +96,5 @@ DEF human2 Pedestrian {
   shirtColor 1 0 0
 }
 DEF flag Solid {
+  translation 0 100 0
 }
