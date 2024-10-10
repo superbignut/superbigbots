@@ -401,7 +401,7 @@ def stand_behind_dog():
 def go_back_and_kick():
         # 走到后面去给狗狠狠来一下
         if dig1_data.getSFString() == 'test':
-            wait_time = 20
+            wait_time = 10
         else:
             wait_time = 10
         stand_behind_dog()
@@ -424,15 +424,25 @@ def go_back_and_kick():
 if __name__ == '__main__':
 
     while True:
-        if flag.getPosition()[0] > 50:
-            """ co = myhuman.getSelf().getField('shirtColor')
-            co.setSFVec3f([0,1,1]) """  # 设置颜色总会让控制器重新跑一次，不知道为什么
-            # print("dog oritation", dog1.getOrientation())
-            go_back_and_kick()
-            flag_trans.setSFVec3f([0,0,0])
-            myhuman.step(myhuman.time_step)
-        else:
-            myhuman.step(myhuman.time_step)
-
+        if flag.getPosition()[1] < 50: # 训练过程
+            if flag.getPosition()[0] > 50:
+                """ co = myhuman.getSelf().getField('shirtColor')
+                co.setSFVec3f([0,1,1]) """  # 设置颜色总会让控制器重新跑一次，不知道为什么
+                # print("dog oritation", dog1.getOrientation())
+                go_back_and_kick()
+                flag_trans.setSFVec3f([0,0,0])
+                myhuman.step(myhuman.time_step)
+            else:
+                myhuman.step(myhuman.time_step)
+        else: # 加入小紫
+            if 90 < flag.getPosition()[0] < 110:
+                """ co = myhuman.getSelf().getField('shirtColor')
+                co.setSFVec3f([0,1,1]) """  # 设置颜色总会让控制器重新跑一次，不知道为什么
+                # print("dog oritation", dog1.getOrientation())
+                go_back_and_kick()
+                flag_trans.setSFVec3f([150,100,0])
+                myhuman.step(myhuman.time_step)
+            else:
+                myhuman.step(myhuman.time_step)
         
     

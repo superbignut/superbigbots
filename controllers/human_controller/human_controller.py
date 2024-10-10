@@ -464,16 +464,31 @@ def go_and_arms_up():
 if __name__ == '__main__':
 
     while True:
-        if flag.getPosition()[0] < 50:
-            # print(flag.getField('name').getSFString())
-            # flag_name.setSFString("123")
-            # print("human1 pos ", flag.getPosition()[0])
-            go_and_arms_up()
-            flag_trans.setSFVec3f([100,0,0])
-            
-            myhuman.step(myhuman.time_step)
+        if flag.getPosition()[1] < 50: # 训练过程
+ 
+            if flag.getPosition()[0] < 50:
+                # print(flag.getField('name').getSFString())
+                # flag_name.setSFString("123")
+                # print("human1 pos ", flag.getPosition()[0])
+                go_and_arms_up()
+                flag_trans.setSFVec3f([100,0,0])
+                
+                myhuman.step(myhuman.time_step)
+            else:
+                myhuman.step(myhuman.time_step)
         else:
-            myhuman.step(myhuman.time_step)
+
+            if flag.getPosition()[0] < 50:
+                # print(flag.getField('name').getSFString())
+                # flag_name.setSFString("123")
+                # print("human1 pos ", flag.getPosition()[0])
+                go_and_arms_up()
+                flag_trans.setSFVec3f([100,100,0])
+                
+                myhuman.step(myhuman.time_step)
+            else:
+                myhuman.step(myhuman.time_step)
+            pass # 加入小紫
 
         
     

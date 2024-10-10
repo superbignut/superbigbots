@@ -1,0 +1,99 @@
+#VRML_SIM R2023b utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/Floor.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/boston_dynamics/spot/protos/Spot.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/appearances/protos/Parquetry.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/humans/pedestrian/protos/Pedestrian.proto"
+
+WorldInfo {
+  contactProperties [
+    ContactProperties {
+      material2 "dumbbell"
+      frictionRotation 1 1
+      rollingFriction 1 1 1
+    }
+  ]
+}
+Viewpoint {
+  orientation -0.16686975271643636 0.013041914621913538 0.9858926889329032 3.162727091242084
+  position 33.82756538876052 2.857723447843965 10.52844578526841
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+Floor {
+  size 10000 10000
+  appearance Parquetry {
+  }
+}
+Solid {
+  translation -11.95 10.08 0
+  children [
+    DEF WALL Shape {
+      appearance PBRAppearance {
+        baseColor 0.701961 0.466667 0
+        roughness 0.5
+        metalness 0
+      }
+      geometry Box {
+        size 0.1 42 4
+      }
+    }
+  ]
+  name "wall1"
+}
+DEF wall Solid {
+  translation 8.91345 -11.5343 0
+  rotation 0 0 1 -1.6010996938995747
+  children [
+    USE WALL
+  ]
+  name "wall2"
+}
+DEF dog1 Spot {
+  translation 2.50041 0.0658665 0.0947019
+  rotation -0.007729450764176388 -0.01836729893765997 0.999801429245137 0.26896846628812465
+  controller "main_control"
+  controllerArgs [
+    ""
+  ]
+  supervisor TRUE
+}
+DEF human1 Pedestrian {
+  translation 14.0739 6.08524 1.27
+  rotation 0 0 1 -2.6179953071795863
+  name "pedestrian1"
+  controller "human_controller"
+  controllerArgs [
+    "--speed=2.0"
+    "--trajectory=4 5, 4 -4"
+  ]
+  shirtColor 0 1 0
+}
+DEF human3 Pedestrian {
+  translation 0.906991 8.5477 1.27
+  rotation 0 0 1 -0.7854053071795866
+  name "pedestrian3(1)"
+  controller "human3"
+  controllerArgs [
+    "--speed=2.0"
+    "--trajectory=4 5, 4 -4"
+  ]
+  shirtColor 0.666667 0 1
+}
+DEF human2 Pedestrian {
+  translation 5.22305 -6.11594 1.27
+  rotation 0 0 1 1.83259
+  name "pedestrian(1)"
+  controller "human2"
+  controllerArgs [
+    "--speed=2.0"
+    "--trajectory=4 5, 4 -4"
+  ]
+  shirtColor 1 0 0
+}
+DEF flag Solid {
+}

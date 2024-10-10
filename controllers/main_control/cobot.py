@@ -19,6 +19,8 @@ import threading
 import sys
 from threading import Lock
 
+from queue import Queue
+
 from multiprocessing import shared_memory
 
 USER_CMD = ["sit_down", "lie_down", "go_head", "go_back", "give_paw", "stand_up", "null"]
@@ -32,7 +34,7 @@ state_nums = 10
 class Env:
     # 类似rl中的环境类，调用get_input可以获取到环境信息
     # 目前是 10 * 6 = 相位位置*2、速度*2、指令*1、振动输入*1
-    def __init__(self, dim, human:Node, dog:Node,flag:Node=None,rela=True,human1:Node=None, human2:Node=None) -> None:
+    def __init__(self, dim, human:Node, dog:Node,flag:Node=None,rela=True,human1:Node=None, human2:Node=None, human3:Node=None) -> None:
         self.rela = rela
         self.human = human
         self.dog = dog
@@ -41,6 +43,7 @@ class Env:
         self.dim = dim # 这里的dim 指的是 过去多少个时间片的数据
         self.human1 = human1
         self.human2 = human2
+        self.human3 = human3
         self.snn_distance = 40
 
         self.user_cmd = USER_CMD_DICT['null'] # 检测到用户输入命令 0-len(USER_CMD_DICT)
@@ -70,6 +73,8 @@ class Env:
         self.human_color = 0
         self.human_speed = 0
         self.human_path_direction = np.array([0,0]) # 与dog的正前方 相对的角度 只考虑xy平面
+
+        
 
 
         self._all_thread_start()
@@ -107,7 +112,7 @@ class Env:
 
         return np.concatenate((self.human_position, self.human_speed, self.human_cmd, self.dog_gyro), axis=1) # 暂时的数据维度是10 * 6 但是没有进行归一化
     
-    def get_two_human_input(self):
+    def get_three_human_input(self):
         # 这里应该只是要离dog 近的那个人就可以了，所以还需要一个判断吗
         # 数据做的简单一点
         # 一个是衣服颜色， 一个是过来的路线的方向 # 还可以加上速度 
@@ -146,11 +151,11 @@ class Env:
         elif temp_human == 3:
             # print("yes")
             # 这里使用来给紫色 微调小人准备的
-            rela_pos = np.array(self.human1.getPosition()[0:2]) - np.array(self.dog.getPosition()[0:2]) # 紫色仍然使用 huaman1 控制器
+            rela_pos = np.array(self.human3.getPosition()[0:2]) - np.array(self.dog.getPosition()[0:2]) # 紫色仍然使用 huaman1 控制器
             rela_pos = rela_pos / math.sqrt(rela_pos[0]**2 + rela_pos[1] ** 2) # 方向归一化
             # print(rela_pos)
-            temp_return[0] = 0 # 这两个是颜色 绿
-            temp_return[1] = 0 # 红
+            temp_return[0] = 1 # 紫色
+            temp_return[1] = 1 
 
             temp_return[10] = 1 # 这两个是速度 慢
             temp_return[11]= 1 # 快
@@ -174,32 +179,43 @@ class Env:
         
         h1x, h1y = self.human1.getPosition()[0:2]
         h2x, h2y = self.human2.getPosition()[0:2]
+        h3x, h3y = self.human3.getPosition()[0:2]
         dx, dy = self.dog.getPosition()[0:2]
         dis1 = (h1x-dx) **2 + (h1y-dy)**2
         dis2 = (h2x-dx) **2 + (h2y-dy)**2
+        dis3 = (h3x-dx) **2 + (h3y-dy)**2
 
-        if dis1 < self.snn_distance or dis2  < self.snn_distance:
+        if dis1 < self.snn_distance or dis2  < self.snn_distance or dis3 < self.snn_distance:
             return True
         else:
             return False
+        
+
     def which_human_near(self):
         h1x = self.human1.getPosition()[0]
         h1y = self.human1.getPosition()[1]
         h2x = self.human2.getPosition()[0]
         h2y = self.human2.getPosition()[1]
+        h3x = self.human3.getPosition()[0]
+        h3y = self.human3.getPosition()[1]
+
         dx = self.dog.getPosition()[0]
         dy = self.dog.getPosition()[1]
+
         dis1 = (h1x-dx) **2 + (h1y-dy)**2
         dis2 = (h2x-dx) **2 + (h2y-dy)**2
+        dis3 = (h3x-dx) **2 + (h3y-dy)**2        
 
         if dis1 < dis2:
-            if self.human1.getField('name').getSFString() == 'pedestrian': # 由于紫色小人和红色小人使用相同的控制器，所以
-                return 1# 'human1'
+            if dis1 < dis3:
+                return 1
             else:
-                return 3 # 紫色小人
+                return 3
         else:
-            # print(self.human2.getField('name').getSFString())
-            return 2# 'human2'
+            if dis2 < dis3:
+                return 2
+            else:
+                return 3
     
         
     def set_cmd_with_lock(self, cmd):
@@ -225,7 +241,7 @@ class Env:
                 self.set_cmd_with_lock(USER_CMD_DICT["null"])
         
     def _get_gyro(self):
-        time.sleep(2) # 最开始不检查
+        time.sleep(8) # 最开始不检查
         while True:
             _gyro_values =gyro.getValues()     
             # print(_gyro_values)       
@@ -261,6 +277,8 @@ class Cobot:
 
         self.right_predict = 0
         self.right_predict_list = []
+
+        self.emo_queue = deque(maxlen=3) # 只保存最近的情感预测， 用于比较
     def step(self, state=None):
         # 读取输入
         # 检测指令
@@ -290,7 +308,7 @@ class Cobot:
             self.all_sit_down_flag = False
 
 
-        state = self.env.get_two_human_input() #  数据更细与获取， 这里的输入有负数，需要处理
+        state = self.env.get_three_human_input() #  数据更细与获取， 这里的输入有负数，需要处理
         if self.train_i > self.train_num:
             return 
         elif self.train_i == self.train_num:
@@ -317,50 +335,70 @@ class Cobot:
     def mic_change_and_train(self):
         # 这里加入的小紫， 要对模型进行微调
         if self.all_sit_down_flag:
-            self.sit_down_all_the_time()
+            self.sit_down_all_the_time() # 这里就不能一直坐着了，需要根据 情感来进行动作
             self.all_sit_down_flag = False
         
-        state = self.env.get_two_human_input() #  数据更细与获取， 这里的输入有负数，需要处理
+        state = self.env.get_three_human_input() #  数据更细与获取， 这里的输入有负数，需要处理
         if self.micc_i > self.micc_num:
             return 
         elif self.micc_i == self.micc_num:
-            np.savetxt('./cobot_eval_acc.txt', fmt='%f', delimiter=',',X=self.right_predict_list) # 保存预测成功率曲线
+            pass
+            # 暂不保存模型和buffer， 等调好了的
+            """ np.savetxt('./cobot_eval_acc.txt', fmt='%f', delimiter=',',X=self.right_predict_list) # 保存预测成功率曲线
             # 这里最后最好还是可以 单独看一下对 小紫的预测情况  
             print(" 总数为：", self.micc_num+2 ," 预测成功为：", self.right_predict)
             self.emo_model.mic_change_over_save() # 微调训练结束保存数据 
-            self.micc_i += 1
+            self.micc_i += 1 """
+        
         temp_label = 2
         # print(self.env.user_cmd)
         if self.env.user_cmd == USER_CMD_DICT["stand_up"]: # 积极label    
-            # print("positive label")
+            #print("positive label")
             temp_label = 0
         elif self.env.gyro_err == 1: # 消极lebel
-            # print("negetive label")
+            #print("negetive label")
             temp_label = 1
-        if temp_label == 0 or temp_label ==1:
+        
+
+        if temp_label == 0 or temp_label ==1: # 有明确的指令输入时， 这时， 和之前预测的多个情感进行比较
             # print("Net's input data is :",np.array([state]))
             output = self.emo_model.step(data=state) # positive label # 打印输出看看
-            self.emo_model.assign_label_update(newoutput=output, newlabel=temp_label) # 这里先更新
+            
+            predict_label = self.check_emo_queue()
 
-            temp_cnt = [0 for _ in range(len(self.emo_model.buffer))] # 维度是2
-            for i in range(len(self.emo_model.assign_label)):
-                temp_cnt[self.emo_model.assign_label[i]] += output[0, i] # 第一个维度是batch, 
-            predict_label = torch.argmax(torch.tensor(temp_cnt))
+            self.emo_model.assign_label_update(newoutput=output, newlabel=temp_label) # 更新数据
+
             if predict_label == temp_label:
                 self.right_predict += 1
             print("the predict_label is: ", predict_label, " the right_label is: ", temp_label)
             
             self.right_predict_list.append(self.right_predict / (self.micc_i+1)) # 把实时的预测成功占比 写在 list中
             self.micc_i += 1 
-            
+        else: # 这里是只有人接近机器狗的时候， 机器狗也会有一个预测，区别于交互， 这里并不修改buffer 和model
+            output = self.emo_model.step(data=state) # positive label # 打印输出看
+            temp_cnt = [0 for _ in range(len(self.emo_model.buffer))] # 维度是2
+            for i in range(len(self.emo_model.assign_label)):
+                temp_cnt[self.emo_model.assign_label[i]] += output[0, i] # 第一个维度是batch, 
+            predict_label = torch.argmax(torch.tensor(temp_cnt))
+            self.emo_queue.append(predict_label) # 将最近的预测结果放入队列
+            print("the predict_label is: ", self.check_emo_queue())
+
+
+    def check_emo_queue(self):
+        if self.emo_queue.count(0) > self.emo_queue.count(1): # 看谁的数量多
+            return 0
+        else:
+            return 1
         
     def load_model_and_buffer(self):
         self.emo_model.state_from_dict(filename=model_path, device=torch.device("cuda"))
         self.emo_model.buffer = torch.load(buffer_path)
-    
+        self.emo_model.assign_label_update() # 更新buffer
+
     def load_model_and_buffer_after_micc(self):
         self.emo_model.state_from_dict(filename=mic_model_path, device=torch.device("cuda"))
         self.emo_model.buffer = torch.load(mic_buffer_path)
+        self.emo_model.assign_label_update() # 更新buffer
 
     def test(self, state=None):
         # 调用之前需要先加载模型参数和buffer -> load_model_and_buffer
@@ -374,7 +412,7 @@ class Cobot:
             # time.sleep(0.5)
     def _test_thread(self):
         while True:
-            state = self.env.get_two_human_input()
+            state = self.env.get_three_human_input()
             
             with torch.no_grad():
                 # print(state)
@@ -405,12 +443,13 @@ class Cobot:
         pass
     def _test_for_plot_thread(self):
         while True:
-            state = self.env.get_two_human_input()
+            state = self.env.get_three_human_input()
             
             with torch.no_grad():
                 # print(state)
-                output = self.emo_model.step(state)
-
+                self.emo_model.state_from_dict(filename=model_path, device=torch.device("cuda"))
+                output = self.emo_model.step(state, reward=0)
+                
                 temp_cnt = [0 for _ in range(len(self.emo_model.buffer))]
                 
                 self.emo_model.assign_label_update() # 统计一下每个神经元的归属label
@@ -425,14 +464,18 @@ class Cobot:
                     if self.test_i > self.test_num:
                         np.savetxt('./cobot_test_acc_before_micc.txt', fmt='%f', delimiter=',',X=self.test_acc_list) # 保存预测成功率曲线
                         break # 线程结束
-                    if (predict_label == 1 and self.env.which_human_near() == 2) or (predict_label == 0 and self.env.which_human_near()==3):
+                    which_human = self.env.which_human_near()
+                    print("预测结果为： ", predict_label, " human is :", which_human)
+                    if (predict_label == 1 and which_human == 2) or (predict_label == 0 and which_human==3):
                         self.right_i +=1
                     self.test_acc_list.append(self.right_i / (1+self.test_i))
                         
 
 
 
-
+    def do_emotional_action(self):
+        # 根据不同的情感，做出不同的动作
+        pass
 
     def sit_down_all_the_time(self):
         temp_thread = threading.Thread(target=self._sit_down_thread,name="_sit_down_thread")
