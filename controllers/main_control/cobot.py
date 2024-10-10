@@ -493,19 +493,43 @@ class Cobot:
     def do_emotional_action(self):
         # 根据不同的情感，做出不同的动作
         sit_down(4)
-        temp_thread = threading.Thread(target=self._do_emotional_action, name="_do_emotional_action")
+        temp_thread = threading.Thread(target=self._do_ranked_emotional_action, name="_do_ranked_emotional_action")
         temp_thread.start()
     
     
     def _do_emotional_action(self):
         # 这里要怎么设计，才能， 在仿真环境中，更好的可视化的展示出happy， sad 的情绪呢
         while True:
-            temp_emo = self.check_emo_queue()
+            temp_emo = self.check_emo_queue() # 虽然训练时是 happy 和sad 进行二分类的，但是实际上由于检测频率更高，可以根据检测到的比例来
             if temp_emo == EMO["positive"]:
                 give_paw_emo_change(2.0,self) # 这里把dog的对象也传进去，动作执行的循环中，判断是否情感发生变化，发生变化则退出当前动作
+                go_ahead_emo_change(4.0, self)
             else:
                 lie_down_emo_change(2.0,self)
+    
+    def _do_ranked_emotional_action(self):
+        # 要做的内容是 怎么 再go_ahead 的时候把狗的朝向也加进去
+        while True:
+            temp_detail_emo = self.check_emo_queue_detail()
+            if temp_detail_emo == EMO["positive"]:
+                happy_actions_emo_change_detail(10.0, self)
+            else:
+                lie_down_emo_change_detail(2.0, self)
+   
+    
+    
+    def check_emo_queue_detail(self):
+        # 只有连续的 emo_queue_size 全是一个值，才作为emotion 判定
+        with self.emo_queue_lock:
+            pos_emo = self.emo_queue.count(0)
+            neg_emo = self.emo_queue.count(1)
 
+            if pos_emo == self.emo_size:
+                return 0
+            elif neg_emo == self.emo_size:
+                return 1
+            else:
+                return neg_emo / self.emo_size # 返回介于0-1中间的数字
 
     def sit_down_all_the_time(self):
         temp_thread = threading.Thread(target=self._sit_down_thread,name="_sit_down_thread")

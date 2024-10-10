@@ -34,6 +34,8 @@ def movement_decomposition(target, duration): #  这个控制的是输入的 pos
             current_position[j] += step_difference[j]
             motors[j].setPosition(current_position[j])
         step()
+
+
 def movement_decomposition_emo_change(target, duration, cobot): #  这个控制的是输入的 position
     temp_emo = cobot.check_emo_queue()
     n_steps_to_achieve_target = int(duration * 1000 / timestep)
@@ -52,6 +54,25 @@ def movement_decomposition_emo_change(target, duration, cobot): #  这个控制�
             motors[j].setPosition(current_position[j])
         step()
 
+
+def movement_decomposition_emo_change_detail(target, duration, cobot): #  这个控制的是输入的 position
+    temp_emo = cobot.check_emo_queue_detail()
+    n_steps_to_achieve_target = int(duration * 1000 / timestep)
+    step_difference = [0] * NUMBER_OF_JOINTS
+    current_position = [0] * NUMBER_OF_JOINTS
+
+    for i in range(NUMBER_OF_JOINTS):
+        current_position[i] = motors[i].getTargetPosition()
+        step_difference[i] = (target[i] - current_position[i]) / n_steps_to_achieve_target
+
+    for i in range(n_steps_to_achieve_target):
+        for j in range(NUMBER_OF_JOINTS):
+            if(cobot.check_emo_queue_detail() != temp_emo): # 如果emo 发生变化 则退出当前动作
+                return
+            current_position[j] += step_difference[j]
+            motors[j].setPosition(current_position[j])
+        step()
+# check_emo_queue_detail
 def lie_down_emo_change(duration, cobot):
     motors_target_pos = [-0.40, -0.99, 1.59,   # Front left leg
                          0.40, -0.99, 1.59,   # Front right leg
@@ -59,6 +80,12 @@ def lie_down_emo_change(duration, cobot):
                          0.40, -0.99, 1.59]   # Rear right leg
     movement_decomposition_emo_change(motors_target_pos, duration, cobot)
 
+def lie_down_emo_change_detail(duration, cobot):
+    motors_target_pos = [-0.40, -0.99, 1.59,   # Front left leg
+                         0.40, -0.99, 1.59,   # Front right leg
+                         -0.40, -0.99, 1.59,  # Rear left leg
+                         0.40, -0.99, 1.59]   # Rear right leg
+    movement_decomposition_emo_change_detail(motors_target_pos, duration, cobot)
 def lie_down(duration):
     motors_target_pos = [-0.40, -0.99, 1.59,   # Front left leg
                          0.40, -0.99, 1.59,   # Front right leg
@@ -78,12 +105,78 @@ def sit_down(duration):
                          0.40, -0.90, 1.18]   # Rear right leg
     movement_decomposition(motors_target_pos, duration)
 
-def sit_down_emo_change(duration):
+def sit_down_emo_change(duration,cobot):
     motors_target_pos = [-0.20, -0.40, -0.19,  # Front left leg
                          0.20, -0.40, -0.19,  # Front right leg
                          -0.40, -0.90, 1.18,  # Rear left leg
                          0.40, -0.90, 1.18]   # Rear right leg
     movement_decomposition_emo_change(motors_target_pos, duration, cobot)
+
+def sit_down_emo_change_detail(duration, cobot, alpha=1):
+    """     motors_target_pos1 = [-0.20, -0.40, -0.09,  # Front left leg
+                         0.20, -0.40, -0.09,  # Front right leg
+                         -0.40, -0.90, 1.38,  # Rear left leg
+                         0.40, -0.90, 1.38]   # Rear right leg
+    movement_decomposition(motors_target_pos1, 2)               # 先快速蹲下 """
+    motors_target_pos = [-0.20, -0.40, -0.19,  # Front left leg
+                         0.20, -0.40, -0.19,  # Front right leg
+                         -0.40, -0.90, 1.18,  # Rear left leg
+                         0.40, -0.90, 1.18]   # Rear right leg
+    motors_target_pos = list(map(lambda x: x*(1-alpha), motors_target_pos))
+    movement_decomposition_emo_change_detail(motors_target_pos, duration, cobot)
+def give_paw_emo_change_detail(duration, cobot):
+    # Stabilize posture
+    temp_emo = cobot.check_emo_queue_detail()
+    motors_target_pos_1 = [-0.20, -0.30, 0.05,  # Front left leg
+                           0.20, -0.40, -0.19,  # Front right leg
+                           -0.40, -0.90, 1.18,  # Rear left leg
+                           0.49, -0.90, 0.80]   # Rear right leg
+
+    movement_decomposition_emo_change_detail(motors_target_pos_1, 2, cobot)
+
+    initial_time = robot.getTime()
+    while robot.getTime() - initial_time < duration:
+        if(cobot.check_emo_queue_detail() != temp_emo): # 如果emo 发生变化 则退出当前动作
+            return
+        motors[4].setPosition(0.2 * math.sin(2 * robot.getTime()) + 0.6)  # Upperarm movement
+        motors[5].setPosition(0.4 * math.sin(2 * robot.getTime()))        # Forearm movement
+        step()
+    # Get back in sitting posture
+    motors_target_pos_2 = [-0.20, -0.40, -0.19,  # Front left leg
+                           0.20, -0.40, -0.19,  # Front right leg
+                           -0.40, -0.90, 1.18,  # Rear left leg
+                           0.40, -0.90, 1.18]   # Rear right leg
+
+    movement_decomposition_emo_change_detail(motors_target_pos_2, 2, cobot)
+
+
+
+def tiktok_emo_change_detail(duration, cobot):
+    # Stabilize posture
+    temp_emo = cobot.check_emo_queue_detail()
+    motors_target_pos = [-0.20, -0.40, -0.19,  # Front left leg
+                         0.20, -0.40, -0.19,  # Front right leg
+                         -0.40, -0.90, 1.18,  # Rear left leg
+                         0.40, -0.90, 1.18]   # Rear right leg
+
+    movement_decomposition_emo_change_detail(motors_target_pos, 2, cobot)
+
+    initial_time = robot.getTime()
+    while robot.getTime() - initial_time < duration:
+        if(cobot.check_emo_queue_detail() != temp_emo): # 如果emo 发生变化 则退出当前动作
+            return
+        # motors[4].setPosition(0.2 * math.sin(2 * robot.getTime()) + 0.6)  # Upperarm movement
+        motors[5].setPosition(0.4 * math.sin(2 * robot.getTime()))        # Forearm movement
+        # motors[1].setPosition(0.2 * math.cos(2 * robot.getTime()) + 0.6)  # Upperarm movement
+        motors[2].setPosition(-0.4 * math.sin(2 * robot.getTime()))        # Forearm movement
+        step()
+    """     # Get back in sitting posture
+    motors_target_pos_2 = [-0.20, -0.40, -0.19,  # Front left leg
+                           0.20, -0.40, -0.19,  # Front right leg
+                           -0.40, -0.90, 1.18,  # Rear left leg
+                           0.40, -0.90, 1.18]   # Rear right leg """
+
+    # movement_decomposition_emo_change_detail(motors_target_pos_2, 2, cobot)
 
 def give_paw_emo_change(duration, cobot):
     # Stabilize posture
@@ -209,4 +302,97 @@ def go_ahead(duration):
 
         t += timestep / 1000.0
         step()
+def happy_actions_emo_change_detail(duration, cobot):
+    # 先 give_paw
+    temp_emo = cobot.check_emo_queue_detail()
+    motors_target_pos_1 = [-0.20, -0.30, 0.05,  # Front left leg
+                           0.20, -0.40, -0.19,  # Front right leg
+                           -0.40, -0.90, 1.18,  # Rear left leg
+                           0.49, -0.90, 0.80]   # Rear right leg
 
+    movement_decomposition_emo_change_detail(motors_target_pos_1, 2, cobot)
+
+    initial_time = robot.getTime()
+    while robot.getTime() - initial_time < 2:
+        if(cobot.check_emo_queue_detail() != temp_emo): # 如果emo 发生变化 则退出当前动作
+            return
+        motors[4].setPosition(0.2 * math.sin(2 * robot.getTime()) + 0.6)  # Upperarm movement
+        motors[5].setPosition(0.4 * math.sin(2 * robot.getTime()))        # Forearm movement
+        step()
+    # 再 go_head
+    motors_target_pos = [-0.1, 0.0, 0.0,   # Front left leg
+                          0.1, 0.0, 0.0,   # Front right leg
+                         -0.1, 0.0, 0.0,   # Rear left leg
+                          0.1, 0.0, 0.0]   # Rear right leg
+    movement_decomposition_emo_change_detail(motors_target_pos, 1.0, cobot) # 先stand_up
+    Ah = 14
+    Ak = 10
+    initial_time = robot.getTime()
+    t = 0
+    T = 1
+    while t < duration:
+        if(cobot.check_emo_queue_detail() != temp_emo): # 如果emo 发生变化 则退出当前动作
+            return
+        t = robot.getTime() - initial_time
+
+        lf_hip_pos = Ah * math.sin(2 * math.pi / T * t)
+        lf_knee_pos = Ak * math.sin(2 * math.pi / T * t - math.pi / 2)
+        lb_hip_pos = Ah * math.sin(2 * math.pi / T * t)
+        lb_knee_pos = Ak * math.sin(2 * math.pi / T * t + math.pi / 2)
+
+        rf_hip_pos = Ah * math.sin(2 * math.pi / T * t + math.pi)
+        rf_knee_pos = Ak * math.sin(2 * math.pi / T * t - math.pi / 2)
+        rb_hip_pos = Ah * math.sin(2 * math.pi / T * t + math.pi)
+        rb_knee_pos = Ak * math.sin(2 * math.pi / T * t + math.pi / 2)
+
+        motors[1].setPosition(deg_2_rad(lb_knee_pos))
+        motors[2].setPosition(deg_2_rad(rb_knee_pos))
+        motors[4].setPosition(deg_2_rad(lf_knee_pos))
+        motors[5].setPosition(deg_2_rad(rf_knee_pos))
+        motors[7].setPosition(deg_2_rad(lb_hip_pos))
+        motors[8].setPosition(deg_2_rad(rb_hip_pos))
+        motors[10].setPosition( deg_2_rad(lf_hip_pos))
+        motors[11].setPosition(deg_2_rad(rf_hip_pos))
+
+        t += timestep / 1000.0
+        step()
+
+def go_ahead_emo_change(duration, cobot):
+    # Initial positions for the joints
+    motors_target_pos = [-0.1, 0.0, 0.0,   # Front left leg
+                          0.1, 0.0, 0.0,   # Front right leg
+                         -0.1, 0.0, 0.0,   # Rear left leg
+                          0.1, 0.0, 0.0]   # Rear right leg
+    temp_emo = cobot.check_emo_queue()
+    movement_decomposition_emo_change(motors_target_pos, 1.0, cobot) # 先stand_up
+    Ah = 14
+    Ak = 10
+    initial_time = robot.getTime()
+    t = 0
+    T = 1
+    while t < duration:
+        if(cobot.check_emo_queue() != temp_emo): # 如果emo 发生变化 则退出当前动作
+            return
+        t = robot.getTime() - initial_time
+
+        lf_hip_pos = Ah * math.sin(2 * math.pi / T * t)
+        lf_knee_pos = Ak * math.sin(2 * math.pi / T * t - math.pi / 2)
+        lb_hip_pos = Ah * math.sin(2 * math.pi / T * t)
+        lb_knee_pos = Ak * math.sin(2 * math.pi / T * t + math.pi / 2)
+
+        rf_hip_pos = Ah * math.sin(2 * math.pi / T * t + math.pi)
+        rf_knee_pos = Ak * math.sin(2 * math.pi / T * t - math.pi / 2)
+        rb_hip_pos = Ah * math.sin(2 * math.pi / T * t + math.pi)
+        rb_knee_pos = Ak * math.sin(2 * math.pi / T * t + math.pi / 2)
+
+        motors[1].setPosition(deg_2_rad(lb_knee_pos))
+        motors[2].setPosition(deg_2_rad(rb_knee_pos))
+        motors[4].setPosition(deg_2_rad(lf_knee_pos))
+        motors[5].setPosition(deg_2_rad(rf_knee_pos))
+        motors[7].setPosition(deg_2_rad(lb_hip_pos))
+        motors[8].setPosition(deg_2_rad(rb_hip_pos))
+        motors[10].setPosition( deg_2_rad(lf_hip_pos))
+        motors[11].setPosition(deg_2_rad(rf_hip_pos))
+
+        t += timestep / 1000.0
+        step()
