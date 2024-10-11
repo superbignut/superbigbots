@@ -84,7 +84,7 @@ class EMONET(spaic.Network):
         
         self.set_backend(backend)
 
-        self.buffer = [[],[]] # 积极, 消极 投票神经元的buffer
+        self.buffer = [[],[]] # 积极, 消极 投票神经元的buffer # 这里可以改成 【queue， queue】， 但是需要重新训练
 
         self.assign_label = None
 
@@ -135,7 +135,8 @@ class EMONET(spaic.Network):
         # 如果没有新的数据输入，则就是对 assign_label 进行一次计算，否则 会根据权重插入新数据，进而计算
         if newoutput != None:
             self.buffer[newlabel].append(newoutput)
-        avg_buffer = [sum(self.buffer[i]) / len(self.buffer[i]) for i in range(len(self.buffer))] # sum_buffer 是一个求和之后 取平均的tensor  n * 1 * 100
+        avg_buffer = [sum(self.buffer[i][-100:]) / len(self.buffer[i][-100:]) for i in range(len(self.buffer))] # sum_buffer 是一个求和之后 取平均的tensor  n * 1 * 100
+        # 这里可以只使用 后面的数据进行统计  比如[-300:]
         # avg_buffer = [sum_buffer[i] / len(agent.buffer[i]) for i in range(len(agent.buffer))]
         assign_label = torch.argmax(torch.cat(avg_buffer, 0), 0) # n 个1*100 的list在第0个维度合并 -> n*100的tensor, 进而在第0个维度比哪个更大, 返回一个1维的tensor， 内容是index，0-n， 目前是0和1
         # 这里的 100 个 0 和1 也就代表了， 当前那个神经元 可以代表的 类别是什么

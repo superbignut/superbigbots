@@ -406,9 +406,9 @@ def stand_behind_dog():
 def go_back_and_kick():
         # 走到后面去给狗狠狠来一下
         if dig1_data.getSFString() == 'test':
-            wait_time = 10
+            wait_time = 20
         else:
-            wait_time = 10
+            wait_time = 20
         stand_behind_dog()
         dx, dy, dz = dog1.getPosition() # 初始位置，决定了力的方向
         hx, hy, hz = human1.getPosition()

@@ -45,7 +45,7 @@ class Env:
         self.human1 = human1
         self.human2 = human2
         self.human3 = human3
-        self.snn_distance = 40
+        self.snn_distance = 64
 
         self.user_cmd = USER_CMD_DICT['null'] # 检测到用户输入命令 0-len(USER_CMD_DICT)
         self.user_cmd_lock = Lock() # 用于 场景中 人的动作执行时会直接修改 dog 的  cmd参数， 因此可能会去检测线程冲突，所以加锁
@@ -289,8 +289,8 @@ class Cobot:
         self.right_predict_list = []
 
 
-        self.emo_size = 3 
-        self.emo_queue = deque(maxlen=self.emo_size) # 只保存最近的情感预测， 用于比较
+        self.emo_size = 4 
+        self.emo_queue = deque(maxlen=self.emo_size) # 只保存最近的情感预测， 用于比较, 这里要+1 否则 容量不对
         self.emo_queue_lock = Lock()
     def step(self, state=None):
         # 读取输入
@@ -511,16 +511,19 @@ class Cobot:
         # 要做的内容是 怎么 再go_ahead 的时候把狗的朝向也加进去
         while True:
             temp_detail_emo = self.check_emo_queue_detail()
-            if temp_detail_emo == EMO["positive"]: # 只有靠近了，才触发动作
-                if self.env.people_is_near():
-                    happy_actions_emo_change_detail(10.0, self)
+            if self.env.people_is_near():
+                # 这里是不是最好能等待一下
+                if temp_detail_emo == EMO["positive"]: # 只有靠近了，才触发动作
+                
+                    happy_actions_emo_change_detail(4.0, self)
                     """                 else:
                     sit_down_emo_change_detail(10.0, self) """
+                    sit_down_emo_change_detail(2.0, self)
                 else:
-                    step()
-            else:
-                lie_down_emo_change_detail(2.0, self)
-   
+                    lie_down_emo_change_detail(2.0, self)
+            else:                
+                step()
+                print("No human is near.")
     
     
     def check_emo_queue_detail(self):
@@ -534,6 +537,8 @@ class Cobot:
             elif neg_emo == self.emo_size:
                 return 1
             else:
+                # print(neg_emo / self.emo_size)
+                # print(self.emo_queue)
                 return neg_emo / self.emo_size # 返回介于0-1中间的数字
 
     def sit_down_all_the_time(self):

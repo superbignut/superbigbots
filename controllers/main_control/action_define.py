@@ -297,6 +297,7 @@ def go_ahead(duration):
         t += timestep / 1000.0
         step()
 def rotate_to_human(cobot):
+    # lie_down_emo_change_detail(cobot, 2.0)
     human_number = cobot.env.which_human_near()
     temp_human = 'human' + str(human_number) # 这里其实只用到了 human1， 也就是 暂时只有在 happy 的时候才被调用
     human = robot.getFromDef(temp_human)
@@ -306,12 +307,12 @@ def rotate_to_human(cobot):
     hx, hy, hz = human.getPosition()
     angle = math.atan2(dy-hy, dx-hx)
     # for i in range(1):
-    dog1.getField('rotation').setSFRotation([0.5,0,0.86,angle+math.pi]) # 转过去 # 补充 ，这里应该是全局坐标
+    dog1.getField('rotation').setSFRotation([0.4,0,0.86,angle+math.pi]) # 转过去 # 补充 ，这里应该是全局坐标
         #step()
     # 这里采用的是绝对坐标， 具体是旋转 angle 还是加 pi要于机器人的朝向设定有关
 
 def happy_actions_emo_change_detail(duration, cobot):
-    rotate_to_human(cobot) # 转向靠进它的人
+    # rotate_to_human(cobot) # 转向靠进它的人
     # 先 give_paw
     temp_emo = cobot.check_emo_queue_detail()
     motors_target_pos_1 = [-0.20, -0.30, 0.05,  # Front left leg
@@ -320,7 +321,7 @@ def happy_actions_emo_change_detail(duration, cobot):
                            0.49, -0.90, 0.80]   # Rear right leg
 
     movement_decomposition_emo_change_detail(motors_target_pos_1, 2, cobot)
-
+    
     initial_time = robot.getTime()
     while robot.getTime() - initial_time < 2:
         if(cobot.check_emo_queue_detail() != temp_emo): # 如果emo 发生变化 则退出当前动作

@@ -442,7 +442,7 @@ def go_and_kick():
 
 def go_and_arms_up():
         if dig1_data.getSFString() == 'test':
-            wait_time = 20
+            wait_time = 10
         else:
             wait_time = 10
         stand_before_dog()
