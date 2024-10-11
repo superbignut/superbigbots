@@ -256,7 +256,7 @@ def rotate_to_dog(direction=1):
     if direction ==1:
         human1_rota.setSFRotation([0,0,1,angle]) # 转过去
     else:
-        human1_rota.setSFRotation([0,0,1,angle+math.pi]) # 转过去
+        human1_rota.setSFRotation([0,0,1,angle+math.pi]) # 这里采用的是绝对坐标， 具体是旋转 angle 还是加 pi要于机器人的朝向设定有关
 def go_to_dog():
     rotate_to_dog()
     dx, dy, dz = dog1.getPosition() # 初始位置，

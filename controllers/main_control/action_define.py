@@ -113,16 +113,10 @@ def sit_down_emo_change(duration,cobot):
     movement_decomposition_emo_change(motors_target_pos, duration, cobot)
 
 def sit_down_emo_change_detail(duration, cobot, alpha=1):
-    """     motors_target_pos1 = [-0.20, -0.40, -0.09,  # Front left leg
-                         0.20, -0.40, -0.09,  # Front right leg
-                         -0.40, -0.90, 1.38,  # Rear left leg
-                         0.40, -0.90, 1.38]   # Rear right leg
-    movement_decomposition(motors_target_pos1, 2)               # 先快速蹲下 """
     motors_target_pos = [-0.20, -0.40, -0.19,  # Front left leg
                          0.20, -0.40, -0.19,  # Front right leg
                          -0.40, -0.90, 1.18,  # Rear left leg
                          0.40, -0.90, 1.18]   # Rear right leg
-    motors_target_pos = list(map(lambda x: x*(1-alpha), motors_target_pos))
     movement_decomposition_emo_change_detail(motors_target_pos, duration, cobot)
 def give_paw_emo_change_detail(duration, cobot):
     # Stabilize posture
@@ -302,7 +296,22 @@ def go_ahead(duration):
 
         t += timestep / 1000.0
         step()
+def rotate_to_human(cobot):
+    human_number = cobot.env.which_human_near()
+    temp_human = 'human' + str(human_number) # 这里其实只用到了 human1， 也就是 暂时只有在 happy 的时候才被调用
+    human = robot.getFromDef(temp_human)
+    dog1 = robot.getFromDef('dog1')
+
+    dx, dy, dz = dog1.getPosition() # 初始位置，
+    hx, hy, hz = human.getPosition()
+    angle = math.atan2(dy-hy, dx-hx)
+    # for i in range(1):
+    dog1.getField('rotation').setSFRotation([0.5,0,0.86,angle+math.pi]) # 转过去 # 补充 ，这里应该是全局坐标
+        #step()
+    # 这里采用的是绝对坐标， 具体是旋转 angle 还是加 pi要于机器人的朝向设定有关
+
 def happy_actions_emo_change_detail(duration, cobot):
+    rotate_to_human(cobot) # 转向靠进它的人
     # 先 give_paw
     temp_emo = cobot.check_emo_queue_detail()
     motors_target_pos_1 = [-0.20, -0.30, 0.05,  # Front left leg

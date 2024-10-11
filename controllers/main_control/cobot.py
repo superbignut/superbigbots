@@ -352,16 +352,16 @@ class Cobot:
             self.all_sit_down_flag = False
         
         state = self.env.get_three_human_input() #  数据更细与获取， 这里的输入有负数，需要处理
-        if self.micc_i > self.micc_num:
+        """ if self.micc_i > self.micc_num:
             return 
         elif self.micc_i == self.micc_num:
-            pass
-            # 暂不保存模型和buffer， 等调好了的
-            """ np.savetxt('./cobot_eval_acc.txt', fmt='%f', delimiter=',',X=self.right_predict_list) # 保存预测成功率曲线
-            # 这里最后最好还是可以 单独看一下对 小紫的预测情况  
-            print(" 总数为：", self.micc_num+2 ," 预测成功为：", self.right_predict)
-            self.emo_model.mic_change_over_save() # 微调训练结束保存数据 
-            self.micc_i += 1 """
+            pass """
+        # 暂不保存模型和buffer， 等调好了的
+        """ np.savetxt('./cobot_eval_acc.txt', fmt='%f', delimiter=',',X=self.right_predict_list) # 保存预测成功率曲线
+        # 这里最后最好还是可以 单独看一下对 小紫的预测情况  
+        print(" 总数为：", self.micc_num+2 ," 预测成功为：", self.right_predict)
+        self.emo_model.mic_change_over_save() # 微调训练结束保存数据 
+        self.micc_i += 1 """
         
         temp_label = 2
         # print(self.env.user_cmd)
@@ -511,8 +511,13 @@ class Cobot:
         # 要做的内容是 怎么 再go_ahead 的时候把狗的朝向也加进去
         while True:
             temp_detail_emo = self.check_emo_queue_detail()
-            if temp_detail_emo == EMO["positive"]:
-                happy_actions_emo_change_detail(10.0, self)
+            if temp_detail_emo == EMO["positive"]: # 只有靠近了，才触发动作
+                if self.env.people_is_near():
+                    happy_actions_emo_change_detail(10.0, self)
+                    """                 else:
+                    sit_down_emo_change_detail(10.0, self) """
+                else:
+                    step()
             else:
                 lie_down_emo_change_detail(2.0, self)
    

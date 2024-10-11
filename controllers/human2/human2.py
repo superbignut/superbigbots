@@ -246,7 +246,7 @@ def rotate_to_dog(direction=1):
     hx, hy, hz = human1.getPosition()
     angle = math.atan2(dy-hy, dx-hx)
     if direction ==1:
-        human1_rota.setSFRotation([0,0,1,angle]) # 转过去
+        human1_rota.setSFRotation([0,0,1,angle]) # 转过去 # 补充 ，这里应该是全局坐标
     else:
         human1_rota.setSFRotation([0,0,1,angle+math.pi]) # 转过去
 def go_to_dog():
