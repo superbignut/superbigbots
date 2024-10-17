@@ -1,0 +1,206 @@
+{
+    "autoname1": [
+        {
+            "input": {
+                "id": "autoname1<net>_input<nod>",
+                "name": "input",
+                "num": 12,
+                "type": [],
+                "_dt": null,
+                "_time": 25.6,
+                "coding_var_name": "O",
+                "coding_method": "poisson",
+                "shape": [
+                    12
+                ],
+                "coding_param": {
+                    "time": 25.6,
+                    "unit_conversion": 0.6
+                },
+                "dt": 0.1,
+                "time": 25.6,
+                "kind": "<encoder>",
+                "_class_label": "<nod>"
+            }
+        },
+        {
+            "layer1": {
+                "id": "autoname1<net>_layer1<neg>",
+                "name": "layer1",
+                "num": 100,
+                "model_name": "lifstdp_ex",
+                "type": [
+                    "nontype"
+                ],
+                "shape": [
+                    100
+                ],
+                "parameters": {
+                    "dt": 0.1,
+                    "neuron_num": 100
+                },
+                "_class_label": "<neg>"
+            }
+        },
+        {
+            "layer2": {
+                "id": "autoname1<net>_layer2<neg>",
+                "name": "layer2",
+                "num": 100,
+                "model_name": "lifstdp_ih",
+                "type": [
+                    "nontype"
+                ],
+                "shape": [
+                    100
+                ],
+                "parameters": {
+                    "dt": 0.1,
+                    "neuron_num": 100
+                },
+                "_class_label": "<neg>"
+            }
+        },
+        {
+            "output": {
+                "id": "autoname1<net>_output<nod>",
+                "name": "output",
+                "num": 100,
+                "type": [],
+                "_dt": null,
+                "_time": 25.6,
+                "coding_var_name": "O",
+                "coding_method": "spike_counts",
+                "shape": [
+                    100
+                ],
+                "coding_param": {
+                    "time": 25.6
+                },
+                "dt": 0.1,
+                "time": 25.6,
+                "dec_target": "layer1",
+                "kind": "<decoder>",
+                "_class_label": "<nod>"
+            }
+        },
+        {
+            "reward": {
+                "id": "autoname1<net>_reward<nod>",
+                "name": "reward",
+                "num": 100,
+                "type": [],
+                "_dt": null,
+                "_time": null,
+                "coding_var_name": "O",
+                "coding_method": "environment_reward",
+                "shape": [
+                    100
+                ],
+                "coding_param": {
+                    "coding_time": 25.6,
+                    "dec_sample_step": 1
+                },
+                "dt": 0.1,
+                "time": 1.0,
+                "dec_target": "layer1",
+                "kind": "<reward>",
+                "_class_label": "<nod>"
+            }
+        },
+        {
+            "connection1": {
+                "id": "autoname1<net>_connection1<con>",
+                "name": "connection1",
+                "pre": "autoname1<net>_input<nod>",
+                "post": "autoname1<net>_layer1<neg>",
+                "link_type": "full",
+                "pre_var_name": "O",
+                "post_var_name": "Isyn",
+                "max_delay": 0,
+                "sparse_with_mask": false,
+                "parameters": {},
+                "synapse_type": [
+                    "basic"
+                ],
+                "_class_label": "<con>"
+            }
+        },
+        {
+            "connection2": {
+                "id": "autoname1<net>_connection2<con>",
+                "name": "connection2",
+                "pre": "autoname1<net>_layer1<neg>",
+                "post": "autoname1<net>_layer2<neg>",
+                "link_type": "full",
+                "pre_var_name": "O",
+                "post_var_name": "Isyn",
+                "max_delay": 0,
+                "sparse_with_mask": false,
+                "parameters": {},
+                "synapse_type": [
+                    "basic"
+                ],
+                "_class_label": "<con>"
+            }
+        },
+        {
+            "connection3": {
+                "id": "autoname1<net>_connection3<con>",
+                "name": "connection3",
+                "pre": "autoname1<net>_layer2<neg>",
+                "post": "autoname1<net>_layer1<neg>",
+                "link_type": "full",
+                "pre_var_name": "O",
+                "post_var_name": "Isyn",
+                "max_delay": 0,
+                "sparse_with_mask": false,
+                "parameters": {},
+                "synapse_type": [
+                    "basic"
+                ],
+                "_class_label": "<con>"
+            }
+        },
+        {
+            "monitor": [
+                {
+                    "mon_weight": {
+                        "var_name": "autoname1<net>_connection1<con>:autoname1<net>_layer1<neg><-autoname1<net>_input<nod>:{weight}",
+                        "index": "full",
+                        "dt": 0.1,
+                        "get_grad": false,
+                        "nbatch": -1,
+                        "target": "autoname1<net>_connection1<con>",
+                        "monitor_type": "StateMonitor"
+                    }
+                }
+            ]
+        },
+        {
+            "_learner": {
+                "trainable": [
+                    "connection1"
+                ],
+                "_class_label": "<learner>",
+                "name": "_learner",
+                "optim_name": null,
+                "lr_schedule_name": null,
+                "parameters": {},
+                "algorithm": "nearest_online_STDP"
+            }
+        },
+        {
+            "backend": {
+                "_variables": "./parameters/_variables.pt",
+                "_parameters_dict": "./parameters/_parameters_dict.pt",
+                "dt": 0.1,
+                "runtime": 1.0,
+                "time": 0.0,
+                "n_time_step": 0,
+                "diff_para_dict": "./parameters/diff_para_dict.pt",
+                "data_type": "torch.float32"
+            }
+        }
+    ]
+}
